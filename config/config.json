@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "proxyuser",
+    "password": "xeMv8ulM0BwOnLfd",
+    "database": "boilerplate_dev",
+    "host": "172.17.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "proxyuser",
+    "password": "xeMv8ulM0BwOnLfd",
+    "database": "boilerplate_test",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "proxyuser",
+    "password": "xeMv8ulM0BwOnLfd",
+    "database": "boilerplate",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}
