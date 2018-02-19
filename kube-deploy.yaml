@@ -16,6 +16,8 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            - name: ENV
+              value: "production"
             - name: POSTGRES_DB_HOST
               value: 127.0.0.1:5432
             # [START] cloudsql secrets

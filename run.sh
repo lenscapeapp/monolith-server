@@ -4,7 +4,7 @@ echo Migrating Database
 
 if [ $ENV = "production" ]
 then
-  ./node_modules/.bin/sequelize db:migrate --production
+  ./node_modules/.bin/sequelize db:migrate --env production
 else
   if [ $ENV = "test" ]
   then
