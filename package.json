@@ -1,7 +1,7 @@
 {
-  "name": "hello-world",
+  "name": "monolith",
   "version": "1.0.0",
-  "description": "",
+  "description": "Lenscape server with monolith architecture.",
   "main": "index.js",
   "scripts": {
     "start": "node server.js"
@@ -17,8 +17,8 @@
     "morgan": "^1.9.0",
     "pg": "^7.4.1",
     "pg-hstore": "^2.3.2",
-    "sequelize": "^4.33.1",
-    "sequelize-cli": "^3.2.0"
+    "sequelize": "^4.33.4",
+    "sequelize-cli": "^4.0.0"
   },
   "devDependencies": {
     "eslint": "^4.17.0",
