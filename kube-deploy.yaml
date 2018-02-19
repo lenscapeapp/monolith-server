@@ -1,18 +1,18 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: hello-world-app
+  name: lenscape-monolith
   labels:
-    app: hello-world-app
+    app: lenscape-monolith
 spec:
   template:
     metadata:
       labels:
-        app: hello-world-app
+        app: lenscape-monolith
     spec:
       containers:
-        - name: app
-          image: gcr.io/senior-project-192409/hello-world
+        - name: lenscape-monolith-server
+          image: gcr.io/senior-project-192409/github-lenscapeapp/monolith-sever:latest
           ports:
             - containerPort: 8080
           env:
