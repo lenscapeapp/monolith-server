@@ -11,5 +11,4 @@ COPY . .
 
 EXPOSE 8080
 
-
-CMD ["./node_modules/.bin/sequelize", "db:migrate", "&&", "node", "server.js"]
+CMD ["sh", "./run.sh"]
