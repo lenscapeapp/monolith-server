@@ -1,24 +1,22 @@
-const Router = require('koa-router')
+const { Router } = require('express')
+
+const authRouter = require('./auth')
 
 const router = new Router()
 
-router.all('/echo', (ctx, next) => {
-  ctx.body = {
-    body: ctx.request.body,
-    headers: ctx.request.header
-  }
-})
-
-router.get('/', (ctx, next) => {
-  ctx.body = 'Hello world'
-})
-
-module.exports = {
-  configRoute: (koaApp) => {
-    koaApp
-      .use(router.routes())
-      .use(router.allowedMethods())
-
-    return koaApp
-  }
+function falseAsyncCall () {
+  return new Promise(resolve => {
+    setTimeout(() => resolve('False value'), 500)
+  }).catch(error => console.log(error))
 }
+
+router.use('/', authRouter)
+
+router.all('*', async (req, res) => {
+  const start = Date.now()
+  const result = await falseAsyncCall()
+  res.send(`Hello World ${Date.now() - start}`)
+  return result
+})
+
+module.exports = router

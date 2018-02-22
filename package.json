@@ -4,17 +4,20 @@
   "description": "Lenscape server with monolith architecture.",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "mocha"
   },
   "author": "chinnonae",
   "license": "UNLICENSED",
   "dependencies": {
-    "@koa/cors": "^2.2.1",
-    "koa": "^2.4.1",
-    "koa-better-router": "^2.1.1",
-    "koa-bodyparser": "^4.2.0",
-    "koa-router": "^7.4.0",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "jsonwebtoken": "^8.1.1",
+    "koa-passport": "^4.0.1",
+    "koa-session": "^5.8.1",
     "morgan": "^1.9.0",
+    "passport": "^0.4.0",
+    "passport-jwt": "^3.0.1",
     "pg": "^7.4.1",
     "pg-hstore": "^2.3.2",
     "sequelize": "^4.33.4",
@@ -26,6 +29,7 @@
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-node": "^6.0.0",
     "eslint-plugin-promise": "^3.6.0",
-    "eslint-plugin-standard": "^3.0.1"
+    "eslint-plugin-standard": "^3.0.1",
+    "mocha": "^5.0.1"
   }
 }
