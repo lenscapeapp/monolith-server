@@ -10,7 +10,11 @@ const app = express()
 app.use(bodyParser.json())
 
 app.use((req, res, next) => {
-  console.log(req.originalUrl)
+  console.log({
+    url: req.originalUrl,
+    ip: req.ip,
+    proxies: req.ips
+  })
   next()
 })
 app.use('/', rootRouter)
