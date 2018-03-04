@@ -7,6 +7,8 @@ const port = 8080
 
 const app = express()
 
+app.enable('trust proxy')
+
 app.use(bodyParser.json())
 
 app.use((req, res, next) => {
