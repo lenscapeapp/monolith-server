@@ -81,11 +81,10 @@ router.post('/login', async (req, res) => {
   let localauth = null
   let user = null
   try {
-    localauth = await models.LocalAuth.findOne({ 
+    localauth = await models.LocalAuth.findOne({
       where: { username }
     })
     user = await localauth.getUser()
-    console.log()
   } catch (error) {
     // handle error
     console.log('------------------')

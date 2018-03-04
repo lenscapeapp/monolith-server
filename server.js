@@ -9,6 +9,10 @@ const app = express()
 
 app.use(bodyParser.json())
 
+app.use((req, res, next) => {
+  console.log(req.originalUrl)
+  next()
+})
 app.use('/', rootRouter)
 
 app.listen(port)
