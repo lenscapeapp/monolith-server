@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt')
 const { Router } = require('express')
 const { ExtractJwt, Strategy: JwtStrategy } = require('passport-jwt')
 
-const models = require('../models')
+const { LocalAuth, User } = require('../models')
 
 const router = new Router()
 
@@ -15,26 +15,18 @@ const jwtOptions = {
   secretOrKey: 'secret'
 }
 
-function getFalseInfo () {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({ name: 'falseUser', id: -1 })
-    }, 500)
-  })
-}
-
 passport.use(new JwtStrategy(jwtOptions, async (payload, done) => {
-  const falseInfo = await getFalseInfo()
+  let uniqueID = payload.id
 
-  if (falseInfo) {
-    done(null, falseInfo)
-  } else {
-    done(null, false)
+  try {
+    let user = await User.findOne({ unique_id: uniqueID })
+    done(null, user)
+  } catch (error) {
+    done(error)
   }
 }))
 
 router.post('/register', async (req, res) => {
-  const { LocalAuth } = models
   const { username, password, firstname, lastname } = req.body
 
   if (!(firstname && lastname && username && password)) {
@@ -73,7 +65,7 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   const { username, password } = req.body
-  // TODO: check for login information in req.body
+
   if (!(username && password)) {
     res.status(400).send({ message: 'Username or Password is missing' })
   }
@@ -81,13 +73,11 @@ router.post('/login', async (req, res) => {
   let localauth = null
   let user = null
   try {
-    localauth = await models.LocalAuth.findOne({
+    localauth = await LocalAuth.findOne({
       where: { username }
     })
     user = await localauth.getUser()
   } catch (error) {
-    // handle error
-    console.log('------------------')
     console.error(error)
   }
 
@@ -95,7 +85,6 @@ router.post('/login', async (req, res) => {
     return res.status(401).json({ message: 'Invalid credential' })
   }
 
-  // TODO: check password/secrets
   let authenticated = await bcrypt.compare(localauth.hpassword, password)
   if (authenticated) {
     return res.status(401).json({ message: 'Invalid credential' })
@@ -103,7 +92,7 @@ router.post('/login', async (req, res) => {
 
   const payload = {
     id: user.unique_id,
-    exp: Math.floor(Date.now() / 1000) + 1000
+    exp: Math.floor(Date.now() / 1000) + DAY
   }
   const token = jwt.sign(payload, jwtOptions.secretOrKey)
   res.json({ message: 'authenticated', token })
