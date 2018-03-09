@@ -63,7 +63,7 @@ router.post('/register', async (req, res) => {
   })
 })
 
-router.post('/login', async (req, res) => {
+router.post('/login/local', async (req, res) => {
   const { username, password } = req.body
 
   if (!(username && password)) {
@@ -96,6 +96,10 @@ router.post('/login', async (req, res) => {
   }
   const token = jwt.sign(payload, jwtOptions.secretOrKey)
   res.json({ message: 'authenticated', token })
+})
+
+router.post('/login/facebook', async (req, res) => {
+  return res.status(500).json({ message: 'Not implemented' })
 })
 
 router.get('/secret', passport.authenticate('jwt', { session: false }), (req, res) => {
