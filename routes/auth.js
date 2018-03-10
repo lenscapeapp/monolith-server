@@ -5,7 +5,8 @@ const bcrypt = require('bcrypt')
 const { Router } = require('express')
 const { ExtractJwt, Strategy: JwtStrategy } = require('passport-jwt')
 
-const { LocalAuth, User } = require('../models')
+const { FacebookAuth, LocalAuth, User } = require('../models')
+const facebook = require('../functions/facebook')
 
 const router = new Router()
 
@@ -14,6 +15,21 @@ const DAY = 60 * 60 * 24
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: 'secret'
+}
+
+function signJWT (req, res) {
+  let { user, authMethod } = req
+
+  let payload = {
+    id: user.id,
+    exp: Math.floor(Date.now() / 1000) + DAY
+  }
+  let token = jwt.sign(payload, jwtOptions.secretOrKey)
+
+  return res.json({
+    message: 'Authenticated',
+    token
+  })
 }
 
 passport.use(new JwtStrategy(jwtOptions, async (payload, done) => {
@@ -27,7 +43,7 @@ passport.use(new JwtStrategy(jwtOptions, async (payload, done) => {
   }
 }))
 
-router.post('/register', async (req, res) => {
+router.post('/register', async (req, res, next) => {
   const { password, firstname, lastname, email } = req.body
 
   if (!(firstname && lastname && password)) {
@@ -61,18 +77,13 @@ router.post('/register', async (req, res) => {
       return res.status(400).json(error)
     }
   }
-  let token = jwt.sign({
-    id: user.id,
-    exp: Math.floor(Date.now() / 1000) + DAY
-  }, jwtOptions.secretOrKey)
 
-  return res.status(200).json({
-    message: 'Authenticated',
-    token
-  })
-})
+  req.user = user
+  req.authMethod = localauth
+  next()
+}, signJWT)
 
-router.post('/login/local', async (req, res) => {
+router.post('/login/local', async (req, res, next) => {
   const { email, password } = req.body
 
   if (!(email && password)) {
@@ -99,17 +110,43 @@ router.post('/login/local', async (req, res) => {
     return res.status(401).json({ message: 'Invalid credential' })
   }
 
-  const payload = {
-    id: user.id,
-    exp: Math.floor(Date.now() / 1000) + DAY
-  }
-  const token = jwt.sign(payload, jwtOptions.secretOrKey)
-  res.json({ message: 'authenticated', token })
-})
+  req.user = user
+  req.authMethod = localauth
+  next()
+}, signJWT)
 
-router.post('/login/facebook', async (req, res) => {
-  return res.status(500).json({ message: 'Not implemented' })
-})
+router.post('/login/facebook', async (req, res, next) => {
+  try {
+    let {
+      email,
+      picture,
+      first_name: firstname,
+      last_name: lastname,
+      id: facebook_id 
+    } = await facebook.getProfile(req.body.access_token)
+
+    let [user, uCreated] = await User.findOrCreate({
+      firstname,
+      lastname,
+      email,
+      where: { email }
+    })
+    let [facebookAuth, fCreated] = await FacebookAuth.findOrCreate({
+      user_id: user.id,
+      facebook_id,
+      where: { user_id: user.id }
+    })
+
+    req.user = user
+    req.authMethod = facebookAuth
+    next()
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Oops! Something went wrong',
+      error
+    })
+  }
+}, signJWT)
 
 router.get('/secret', passport.authenticate('jwt', { session: false }), (req, res) => {
   res.json('This is secret that need authentication.')

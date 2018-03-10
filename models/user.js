@@ -21,6 +21,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'user_id',
       constraints: false
     })
+    User.hasOne(models.FacebookAuth, {
+      foreignKey: 'user_id',
+      constraints: false
+    })
   }
 
   return User
