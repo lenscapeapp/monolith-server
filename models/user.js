@@ -13,10 +13,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {})
 
   User.associate = function (models) {
-    User.hasMany(models.Photo, {
-      foreignKey: 'owner_id',
-      constraints: false
-    })
     User.hasOne(models.LocalAuth, {
       foreignKey: 'user_id',
       constraints: false
