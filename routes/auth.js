@@ -17,9 +17,9 @@ const jwtOptions = {
   secretOrKey: 'secret'
 }
 
-function signJWT (req, res) {
+function authorize (req, res) {
   let { user, authMethod } = req
-
+  
   let payload = {
     id: user.id,
     exp: Math.floor(Date.now() / 1000) + DAY
@@ -27,6 +27,12 @@ function signJWT (req, res) {
   let token = jwt.sign(payload, jwtOptions.secretOrKey)
 
   return res.json({
+    user: {
+      id: user.id,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email
+    },
     message: 'Authenticated',
     token
   })
@@ -81,7 +87,7 @@ router.post('/register', async (req, res, next) => {
   req.user = user
   req.authMethod = localauth
   next()
-}, signJWT)
+}, authorize)
 
 router.post('/login/local', async (req, res, next) => {
   const { email, password } = req.body
@@ -113,7 +119,7 @@ router.post('/login/local', async (req, res, next) => {
   req.user = user
   req.authMethod = localauth
   next()
-}, signJWT)
+}, authorize)
 
 router.post('/login/facebook', async (req, res, next) => {
   try {
@@ -122,20 +128,25 @@ router.post('/login/facebook', async (req, res, next) => {
       picture,
       first_name: firstname,
       last_name: lastname,
-      id: facebook_id 
+      id: facebookId
     } = await facebook.getProfile(req.body.access_token)
 
     let [user, uCreated] = await User.findOrCreate({
-      firstname,
-      lastname,
-      email,
       where: { email }
     })
+    if (uCreated) {
+      user.firstname = firstname
+      user.lastname = lastname
+      await user.save()
+    }
+
     let [facebookAuth, fCreated] = await FacebookAuth.findOrCreate({
-      user_id: user.id,
-      facebook_id,
       where: { user_id: user.id }
     })
+    if (fCreated) {
+      facebookAuth.facebook_id = facebookId
+      await facebookAuth.save()
+    }
 
     req.user = user
     req.authMethod = facebookAuth
@@ -146,7 +157,7 @@ router.post('/login/facebook', async (req, res, next) => {
       error
     })
   }
-}, signJWT)
+}, authorize)
 
 router.get('/secret', passport.authenticate('jwt', { session: false }), (req, res) => {
   res.json('This is secret that need authentication.')
