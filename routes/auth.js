@@ -1,5 +1,6 @@
 const passport = require('passport')
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
 const bcrypt = require('bcrypt')
 const { Router } = require('express')
 const { ExtractJwt, Strategy: JwtStrategy } = require('passport-jwt')
@@ -8,7 +9,7 @@ const { LocalAuth, User } = require('../models')
 
 const router = new Router()
 
-const DAY = 1000 * 60 * 60 * 24
+const DAY = 60 * 60 * 24
 
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -27,9 +28,9 @@ passport.use(new JwtStrategy(jwtOptions, async (payload, done) => {
 }))
 
 router.post('/register', async (req, res) => {
-  const { username, password, firstname, lastname } = req.body
+  const { password, firstname, lastname, email } = req.body
 
-  if (!(firstname && lastname && username && password)) {
+  if (!(firstname && lastname && password)) {
     res.status(400).send({ message: 'Bad request' })
   }
 
@@ -39,11 +40,11 @@ router.post('/register', async (req, res) => {
   let hpassword = await bcrypt.hash(password, 5)
   try {
     localauth = await LocalAuth.create({
-      username,
       hpassword,
       User: {
         firstname,
-        lastname
+        lastname,
+        email
       }
     }, {
       include: [{
@@ -52,31 +53,39 @@ router.post('/register', async (req, res) => {
     })
     user = await localauth.getUser()
   } catch (error) {
-    return res.status(400).json({
-      message: error.errors[0].message
-    })
+    if (error.name.includes(sequelize.UniqueConstraintError.name)) {
+      return res.status(400).json({
+        message: 'Email is already used.'
+      })
+    } else {
+      return res.status(400).json(error)
+    }
   }
+  let token = jwt.sign({
+    id: user.id,
+    exp: Math.floor(Date.now() / 1000) + DAY
+  }, jwtOptions.secretOrKey)
 
   return res.status(200).json({
-    id: user.unique_id,
-    username: localauth.username
+    message: 'Authenticated',
+    token
   })
 })
 
 router.post('/login/local', async (req, res) => {
-  const { username, password } = req.body
+  const { email, password } = req.body
 
-  if (!(username && password)) {
-    res.status(400).send({ message: 'Username or Password is missing' })
+  if (!(email && password)) {
+    res.status(400).send({ message: 'Email or Password is missing' })
   }
 
   let localauth = null
   let user = null
   try {
-    localauth = await LocalAuth.findOne({
-      where: { username }
+    user = await User.findOne({
+      where: { email }
     })
-    user = await localauth.getUser()
+    localauth = await user.getLocalAuth()
   } catch (error) {
     console.error(error)
   }
@@ -91,7 +100,7 @@ router.post('/login/local', async (req, res) => {
   }
 
   const payload = {
-    id: user.unique_id,
+    id: user.id,
     exp: Math.floor(Date.now() / 1000) + DAY
   }
   const token = jwt.sign(payload, jwtOptions.secretOrKey)

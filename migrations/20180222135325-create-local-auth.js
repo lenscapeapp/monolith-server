@@ -12,10 +12,6 @@ module.exports = {
         type: Sequelize.INTEGER,
         references: { model: 'Users', key: 'id' }
       },
-      username: {
-        type: Sequelize.STRING(20),
-        unique: true
-      },
       hpassword: {
         type: Sequelize.STRING
       },

@@ -8,10 +8,6 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      unique_id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4
-      },
       firstname: {
         type: Sequelize.STRING
       },
@@ -19,7 +15,8 @@ module.exports = {
         type: Sequelize.STRING
       },
       email: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        unique: true
       },
       createdAt: {
         allowNull: false,
