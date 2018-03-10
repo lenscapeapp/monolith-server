@@ -10,6 +10,7 @@ const app = express()
 app.enable('trust proxy')
 
 app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: false }))
 
 app.use((req, res, next) => {
   console.log({
