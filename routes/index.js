@@ -6,4 +6,8 @@ const router = new Router()
 
 router.use('/', authRouter)
 
+router.get('/', (req, res) => {
+  res.json({ message: 'Health check' })
+})
+
 module.exports = router
