@@ -59,7 +59,8 @@ router.post('/register', async (req, res, next) => {
   let user = null
   let localauth = null
 
-  let hpassword = await bcrypt.hash(password, 5)
+  console.log(password)
+  let hpassword = await bcrypt.hash(password, 10)
   try {
     localauth = await LocalAuth.create({
       hpassword,
@@ -110,9 +111,9 @@ router.post('/login/local', async (req, res, next) => {
   if (!localauth) {
     return res.status(401).json({ message: 'Invalid credential' })
   }
-
-  let authenticated = await bcrypt.compare(localauth.hpassword, password)
-  if (authenticated) {
+  
+  let authenticated = await bcrypt.compare(password, localauth.hpassword)
+  if (!authenticated) {
     return res.status(401).json({ message: 'Invalid credential' })
   }
 
