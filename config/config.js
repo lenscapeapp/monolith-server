@@ -11,7 +11,7 @@ module.exports = {
   production: {
     username: process.env.POSTGRES_DB_USER,
     password: process.env.POSTGRES_DB_PASSWORD,
-    host: 'localhost',
+    host: process.env.POSTGRES_DB_HOST,
     database: 'lenscape_prod',
     dialect: 'postgres'
   }

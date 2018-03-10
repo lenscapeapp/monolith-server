@@ -22,7 +22,7 @@ spec:
             - name: NODE_ENV
               value: "production"
             - name: POSTGRES_DB_HOST
-              value: 127.0.0.1:5432
+              value: localhost 
             # [START] cloudsql secrets
             - name: POSTGRES_DB_USER
               valueFrom:
