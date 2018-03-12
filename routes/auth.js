@@ -3,22 +3,11 @@ const bcrypt = require('bcrypt')
 const { Router } = require('express')
 const multer = require('multer')
 
-const facebook = require('../functions/facebook')
-const auth = require('../functions/auth')
-const resize = require('../functions/resize')
-const bucket = require('../functions/bucket')
-const filename = require('../functions/filename')
-const { FacebookAuth, LocalAuth, User, Photo } = require('../models')
+const { Facebook, Auth, Resize, Bucket, File } = require('../functions')
+const { FacebookAuth, LocalAuth, User } = require('../models')
 
 const router = new Router()
-const upload = multer({
-  fileFilter: function (req, file, cb) {
-    if (file.mimetype !== 'image/jpg' && file.mimetype !== 'image/jpeg' && file.mimetype !== 'image/png') {
-      return cb(null, false, new Error('Only JPEG/JPG/PNG files are accepted'))
-    }
-    cb(null, true)
-  }
-})
+const upload = multer({ fileFilter: File.photoFormatFilter })
 
 router.post('/register', upload.single('picture'), async (req, res, next) => {
   const { password, firstname, lastname, email } = req.body
@@ -44,15 +33,14 @@ router.post('/register', upload.single('picture'), async (req, res, next) => {
     user = await localauth.getUser()
     if (file !== undefined) {
       let extension = file.mimetype.split('/')[1]
-      let extracted = await resize.squareCrop(file, 200)
       let photo = await user.createPhoto({
         type: 'profile',
         extension
       })
-      let name = filename.encodePhoto(photo)
-      let pictureUrl = await bucket.storePhoto(extracted.buffer, `uploads/${name}`)
 
-      req.userPicture = pictureUrl
+      let pictureUrls = await File.createProfilePictureBundle(file, photo)
+
+      req.userPicture = pictureUrls.thumbnail
     }
   } catch (error) {
     if (error.name.includes(sequelize.UniqueConstraintError.name)) {
@@ -68,7 +56,7 @@ router.post('/register', upload.single('picture'), async (req, res, next) => {
   req.user = user
   req.authMethod = localauth
   next()
-}, auth.authorize)
+}, Auth.authorize)
 
 router.post('/login/local', async (req, res, next) => {
   const { email, password } = req.body
@@ -100,17 +88,18 @@ router.post('/login/local', async (req, res, next) => {
   req.user = user
   req.authMethod = localauth
   next()
-}, auth.authorize)
+}, Auth.authorize)
 
 router.post('/login/facebook', async (req, res, next) => {
   try {
     let {
       email,
       picture,
+      pictureBuffer,
       first_name: firstname,
       last_name: lastname,
       id: facebookId
-    } = await facebook.getProfile(req.body.access_token)
+    } = await Facebook.getProfile(req.body.access_token)
 
     let [user, uCreated] = await User.findOrCreate({
       where: { email }
@@ -134,10 +123,9 @@ router.post('/login/facebook', async (req, res, next) => {
         type: 'profile',
         extension: 'jpg'
       })
-      let url = picture.data.url
-      let path = `uploads/${filename.encodePhoto(photo)}`
-      let bucketUrl = await bucket.upload(url, path)
-      req.userPicture = bucketUrl
+      let file = { buffer: pictureBuffer, mimetype: 'image/jgp' }
+      let pictureBundle = await File.createProfilePictureBundle(file, photo)
+      req.userPicture = pictureBundle.thumbnail
     }
 
     req.user = user
@@ -150,9 +138,9 @@ router.post('/login/facebook', async (req, res, next) => {
       error
     })
   }
-}, auth.authorize)
+}, Auth.authorize)
 
-router.get('/secret', auth.authenticate, (req, res) => {
+router.get('/secret', Auth.authenticate, (req, res) => {
   res.json('This is secret that need authentication.')
 })
 

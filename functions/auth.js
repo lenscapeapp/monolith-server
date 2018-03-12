@@ -3,13 +3,14 @@ const jwt = require('jsonwebtoken')
 const { ExtractJwt, Strategy: JwtStrategy } = require('passport-jwt')
 
 const { User } = require('../models')
-const filename = require('../functions/filename')
+const filename = require('../functions/file')
 const bucket = require('../functions/bucket')
+const { PLACEHOLDER_PROFILE_URL, SECRET } = require('../config/constants')
 
 const A_DAY = 60 * 60 * 24
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: 'secret'
+  secretOrKey: SECRET
 }
 
 function now () { return Math.floor(Date.now() / 1000) }
@@ -30,7 +31,7 @@ async function authorize (req, res) {
       let name = filename.encodePhoto(picture)
       req.userPicture = bucket.getBucketURL(`uploads/${name}`)
     } else {
-      req.userPicture = bucket.getBucketURL('placeholder/profile.jpg')
+      req.userPicture = PLACEHOLDER_PROFILE_URL
     }
   }
 

@@ -2,10 +2,22 @@ const request = require('request-promise-native')
 const querystring = require('querystring')
 const sizeOf = require('image-size')
 
+const { IMAGINARY_BASEURL } = require('../config/constants')
+
 async function keepRatio (file, width) {
+  let dimensions = sizeOf(file.buffer)
+  let isLandscape = dimensions.width > dimensions.height
+  let queryObj = { nocrop: true }
+
+  if (isLandscape) {
+    queryObj.width = width
+  } else {
+    queryObj.height = width
+  }
+
   let formData = { file: file.buffer }
-  let query = querystring.stringify({ width, nocrop: true })
-  let baseUri = 'http://localhost:9000/resize'
+  let query = querystring.stringify(queryObj)
+  let baseUri = `${IMAGINARY_BASEURL}/resize`
 
   let resizedBuffer = await request.post({
     uri: `${baseUri}?${query}`,
@@ -22,6 +34,7 @@ async function squareCrop (file, width) {
   let dimensions = sizeOf(file.buffer)
   let isLandscape = dimensions.width > dimensions.height
   let queryObj = null
+
   if (isLandscape) {
     queryObj = {
       top: 0,
@@ -53,7 +66,7 @@ async function squareCrop (file, width) {
 
   let formData = { file: file.buffer }
   let query = querystring.stringify({ operations: JSON.stringify(ops) })
-  let baseUrl = 'http://localhost:9000/pipeline'
+  let baseUrl = `${IMAGINARY_BASEURL}/pipeline`
   let extractBuffer
   try {
     extractBuffer = await request.post({
@@ -62,6 +75,7 @@ async function squareCrop (file, width) {
       encoding: null
     })
   } catch (error) {
+    console.error('functions/resize.squareCrop', error)
   }
   return {
     buffer: extractBuffer

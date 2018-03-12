@@ -1,30 +1,28 @@
 const Storage = require('@google-cloud/storage')
 
-const PROJECT_ID = 'senior-project-192409'
-const BUCKET_NAME = 'ske-senior-project'
-const BUCKET_DOMAIN = 'https://storage.googleapis.com'
+const { GCLOUD_PROJECT_ID, BUCKET_NAME, BUCKET_BASEURL } = require('../config/constants')
 
-const storage = new Storage({ projectId: PROJECT_ID })
+const storage = new Storage({ projectId: GCLOUD_PROJECT_ID })
 const bucket = storage.bucket(BUCKET_NAME)
+
+function getBucketURL (path) {
+  return `${BUCKET_BASEURL}/${BUCKET_NAME}/${path}`
+}
 
 async function storePhoto (buffer, path, contentType = 'image/jpeg') {
   let bucketFile = bucket.file(path)
 
   try {
-    let saveResponse = await bucketFile.save(buffer)
-    let setMetaResponse = await bucketFile.setMetadata({
+    await bucketFile.save(buffer)
+    await bucketFile.setMetadata({
       contentType
     })
-    let makePublicResponse = await bucketFile.makePublic()
+    await bucketFile.makePublic()
   } catch (err) {
-    console.error(err)
+    console.error('functions/bucket.storePhoto', err)
   }
 
   return getBucketURL(path)
-}
-
-function getBucketURL (path) {
-  return `${BUCKET_DOMAIN}/${BUCKET_NAME}/${path}`
 }
 
 async function upload (remotePath, bucketPath) {
@@ -32,14 +30,19 @@ async function upload (remotePath, bucketPath) {
     destination: bucketPath,
     contentType: 'image/jpg'
   }
-  let [uploadedFile] = await bucket.upload(remotePath, options)
-  let publicRes = await uploadedFile.makePublic()
+
+  try {
+    let [uploadedFile] = await bucket.upload(remotePath, options)
+    await uploadedFile.makePublic()
+  } catch (error) {
+    console.error('functions/bucket.upload')
+  }
 
   return getBucketURL(bucketPath)
 }
 
 module.exports = {
-  storePhoto,
   getBucketURL,
+  storePhoto,
   upload
 }
