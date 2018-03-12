@@ -1,56 +1,28 @@
-const passport = require('passport')
-const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const bcrypt = require('bcrypt')
 const { Router } = require('express')
-const { ExtractJwt, Strategy: JwtStrategy } = require('passport-jwt')
+const multer = require('multer')
 
-const { FacebookAuth, LocalAuth, User } = require('../models')
 const facebook = require('../functions/facebook')
+const auth = require('../functions/auth')
+const resize = require('../functions/resize')
+const bucket = require('../functions/bucket')
+const filename = require('../functions/filename')
+const { FacebookAuth, LocalAuth, User, Photo } = require('../models')
 
 const router = new Router()
-
-const DAY = 60 * 60 * 24
-
-const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: 'secret'
-}
-
-function authorize (req, res) {
-  let { user, authMethod } = req
-  
-  let payload = {
-    id: user.id,
-    exp: Math.floor(Date.now() / 1000) + DAY
+const upload = multer({
+  fileFilter: function (req, file, cb) {
+    if (file.mimetype !== 'image/jpg' && file.mimetype !== 'image/jpeg' && file.mimetype !== 'image/png') {
+      return cb(null, false, new Error('Only JPEG/JPG/PNG files are accepted'))
+    }
+    cb(null, true)
   }
-  let token = jwt.sign(payload, jwtOptions.secretOrKey)
+})
 
-  return res.json({
-    user: {
-      id: user.id,
-      firstname: user.firstname,
-      lastname: user.lastname,
-      email: user.email
-    },
-    message: 'Authenticated',
-    token
-  })
-}
-
-passport.use(new JwtStrategy(jwtOptions, async (payload, done) => {
-  let uniqueID = payload.id
-
-  try {
-    let user = await User.findOne({ unique_id: uniqueID })
-    done(null, user)
-  } catch (error) {
-    done(error)
-  }
-}))
-
-router.post('/register', async (req, res, next) => {
+router.post('/register', upload.single('picture'), async (req, res, next) => {
   const { password, firstname, lastname, email } = req.body
+  const file = req.file
 
   if (!(firstname && lastname && password)) {
     res.status(400).send({ message: 'Bad request' })
@@ -59,28 +31,36 @@ router.post('/register', async (req, res, next) => {
   let user = null
   let localauth = null
 
-  console.log(password)
   let hpassword = await bcrypt.hash(password, 10)
   try {
     localauth = await LocalAuth.create({
       hpassword,
-      User: {
-        firstname,
-        lastname,
-        email
-      }
+      User: { firstname, lastname, email }
     }, {
       include: [{
         association: LocalAuth.associations.User
       }]
     })
     user = await localauth.getUser()
+    if (file !== undefined) {
+      let extension = file.mimetype.split('/')[1]
+      let extracted = await resize.squareCrop(file, 200)
+      let photo = await user.createPhoto({
+        type: 'profile',
+        extension
+      })
+      let name = filename.encodePhoto(photo)
+      let pictureUrl = await bucket.storePhoto(extracted.buffer, `uploads/${name}`)
+
+      req.userPicture = pictureUrl
+    }
   } catch (error) {
     if (error.name.includes(sequelize.UniqueConstraintError.name)) {
       return res.status(400).json({
         message: 'Email is already used.'
       })
     } else {
+      console.error(error)
       return res.status(400).json(error)
     }
   }
@@ -88,7 +68,7 @@ router.post('/register', async (req, res, next) => {
   req.user = user
   req.authMethod = localauth
   next()
-}, authorize)
+}, auth.authorize)
 
 router.post('/login/local', async (req, res, next) => {
   const { email, password } = req.body
@@ -111,7 +91,7 @@ router.post('/login/local', async (req, res, next) => {
   if (!localauth) {
     return res.status(401).json({ message: 'Invalid credential' })
   }
-  
+
   let authenticated = await bcrypt.compare(password, localauth.hpassword)
   if (!authenticated) {
     return res.status(401).json({ message: 'Invalid credential' })
@@ -120,7 +100,7 @@ router.post('/login/local', async (req, res, next) => {
   req.user = user
   req.authMethod = localauth
   next()
-}, authorize)
+}, auth.authorize)
 
 router.post('/login/facebook', async (req, res, next) => {
   try {
@@ -149,18 +129,30 @@ router.post('/login/facebook', async (req, res, next) => {
       await facebookAuth.save()
     }
 
+    if (!picture.data.is_silhouette & uCreated) {
+      let photo = await user.createPhoto({
+        type: 'profile',
+        extension: 'jpg'
+      })
+      let url = picture.data.url
+      let path = `uploads/${filename.encodePhoto(photo)}`
+      let bucketUrl = await bucket.upload(url, path)
+      req.userPicture = bucketUrl
+    }
+
     req.user = user
     req.authMethod = facebookAuth
     next()
   } catch (error) {
+    console.log(error)
     return res.status(500).json({
       message: 'Oops! Something went wrong',
       error
     })
   }
-}, authorize)
+}, auth.authorize)
 
-router.get('/secret', passport.authenticate('jwt', { session: false }), (req, res) => {
+router.get('/secret', auth.authenticate, (req, res) => {
   res.json('This is secret that need authentication.')
 })
 

@@ -21,6 +21,9 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'user_id',
       constraints: false
     })
+    User.hasMany(models.Photo, {
+      foreignKey: 'owner_id'
+    })
   }
 
   return User
