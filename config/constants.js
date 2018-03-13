@@ -7,6 +7,7 @@ const CONTENT_TYPE_EXTENSION_MAP = {
   'image/jpg': 'jpg',
   'image/png': 'png'
 }
+const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 
 module.exports = {
   ALLOWED_CONTENT_TYPE: Object.keys(CONTENT_TYPE_EXTENSION_MAP),
@@ -15,7 +16,7 @@ module.exports = {
   CONTENT_TYPE_EXTENSION_MAP,
   DEFAULT_SECRET,
   GCLOUD_PROJECT_ID: 'senior-project-192409',
-  IMAGINARY_BASEURL: 'http://localhost:9000',
+  IMAGINARY_BASEURL: IS_PRODUCTION ? 'http://imaginary:9000' : 'http://localhost:9000',
   PHOTO_SIZE: {
     'thumbnail': 400,
     'resized': 2000
