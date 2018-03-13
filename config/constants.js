@@ -1,5 +1,5 @@
-const BUCKET_BASEURL = 'https://bucket.lenscape.me'
-const BUCKET_NAME = 'ske-senior-project'
+const BUCKET_BASEURL = 'https://storage.googleapis.com'
+const BUCKET_NAME = 'lenscape'
 
 const DEFAULT_SECRET = 'secret'
 const CONTENT_TYPE_EXTENSION_MAP = {
@@ -15,7 +15,7 @@ module.exports = {
   BUCKET_NAME,
   CONTENT_TYPE_EXTENSION_MAP,
   DEFAULT_SECRET,
-  GCLOUD_PROJECT_ID: 'senior-project-192409',
+  GCLOUD_PROJECT_ID: 'lenscapeapp',
   IMAGINARY_BASEURL: IS_PRODUCTION ? 'http://imaginary:9000' : 'http://localhost:9000',
   PHOTO_SIZE: {
     'thumbnail': 400,

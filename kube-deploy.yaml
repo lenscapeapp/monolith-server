@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
         - name: lenscape-monolith-server
-          image: gcr.io/senior-project-192409/github-lenscapeapp-monolith-server:latest
+          image: gcr.io/lenscapeapp/github-lenscapeapp-monolith-server:4175a5a49ca97829dcea1c904dab6be72fac0bcf
           imagePullPolicy: Always 
           ports:
             - containerPort: 8080
@@ -39,7 +39,7 @@ spec:
         - name: cloudsql-proxy
           image: gcr.io/cloudsql-docker/gce-proxy:1.11
           command: ["/cloud_sql_proxy",
-                    "-instances=senior-project-192409:asia-east1:senior-project=tcp:5432",
+                    "-instances=lenscapeapp:asia-east1:lenscape-db=tcp:5432",
                     "-credential_file=/secrets/cloudsql/credentials.json"]
           volumeMounts:
             - name: cloudsql-instance-credentials
