@@ -10,7 +10,7 @@ router.use('/', authRouter)
 router.use('*', (req, res, next) => {
   const result = validationResult(req)
 
-  if (result.isEmpty()) { next() }
+  if (result.isEmpty()) { return next() }
 
   let invalids = result.mapped()
   let errors = []
@@ -20,7 +20,11 @@ router.use('*', (req, res, next) => {
       message: invalids[field].msg
     })
   }
-  console.log(errors)
+
+  res.status(400).json({
+    message: '',
+    invalid_fields: errors
+  })
 })
 
 module.exports = router

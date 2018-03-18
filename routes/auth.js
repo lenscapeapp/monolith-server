@@ -24,15 +24,20 @@ router.post('/register',
 
       req.user = await req.authMethod.getUser()
     } catch (error) {
-      next(error)
+      res.statusCode = 500
+      return next(error)
     }
 
     if (req.file !== undefined) {
-      let extension = req.file.mimetype.split('/')[1]
-      let photo = await req.user.createPhoto({ type: 'profile', extension })
-      let pictureUrls = await File.createProfilePictureBundle(req.file, photo)
-
-      req.userPicture = pictureUrls.thumbnail
+      try {
+        let extension = req.file.mimetype.split('/')[1]
+        let photo = await req.user.createPhoto({ type: 'profile', extension })
+        let pictureUrls = await File.createProfilePictureBundle(req.file, photo)
+        req.userPicture = pictureUrls.thumbnail
+      } catch (error) {
+        res.statusCode = 500
+        return next(error)
+      }
     }
 
     next()
@@ -55,7 +60,8 @@ router.post('/login/local', async (req, res, next) => {
     })
     localauth = await user.getLocalAuth()
   } catch (error) {
-    console.error(error)
+    res.statusCode = 500
+    return next(error)
   }
 
   if (!localauth) {
@@ -114,11 +120,8 @@ router.post('/login/facebook', async (req, res, next) => {
     req.authMethod = facebookAuth
     next()
   } catch (error) {
-    console.log(error)
-    return res.status(500).json({
-      message: 'Oops! Something went wrong',
-      error
-    })
+    res.statusCode = 500
+    next(error)
   }
 }, Auth.authorize)
 

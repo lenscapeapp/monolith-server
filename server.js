@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 
 const rootRouter = require('./routes')
+const CONSTANTS = require('./config/constants')
 
 const port = 8080
 
@@ -21,5 +22,20 @@ app.use((req, res, next) => {
   next()
 })
 app.use('/', rootRouter)
+
+app.use((err, req, res, next) => {
+  if (res.statusCode >= 500 && res.statusCode <= 599) {
+    if (CONSTANTS.IS_PRODUCTION) {
+      res.sendStatus(res.statusCode)
+      console.error(err)
+    } else {
+      res.status(res.statusCode).json(err)
+    }
+  } else {
+    res.send(res.statusCode).json({
+      message: res.message
+    })
+  }
+})
 
 app.listen(port)
