@@ -28,7 +28,7 @@ async function authorize (req, res) {
     let [picture] = await user.getPhotos({ type: 'profile', active: true })
 
     if (picture !== undefined) {
-      let name = filename.encodePhoto(picture)
+      let name = filename.encodePhoto_(picture, 'th')
       req.userPicture = bucket.getBucketURL(`uploads/${name}`)
     } else {
       req.userPicture = PLACEHOLDER_PROFILE_URL
