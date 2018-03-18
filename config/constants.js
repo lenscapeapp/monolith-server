@@ -1,4 +1,4 @@
-const BUCKET_BASEURL = 'https://storage.googleapis.com'
+const BUCKET_BASEURL = 'https://bucket.lenscape.me'
 const BUCKET_NAME = 'lenscape'
 
 const DEFAULT_SECRET = 'secret'
@@ -21,6 +21,6 @@ module.exports = {
     'thumbnail': 400,
     'resized': 2000
   },
-  PLACEHOLDER_PROFILE_URL: `${BUCKET_BASEURL}/${BUCKET_NAME}/placeholder/profile.jpg`,
+  PLACEHOLDER_PROFILE_URL: `${BUCKET_BASEURL}/placeholder/profile.jpg`,
   SECRET: process.env.APP_SECRET || DEFAULT_SECRET
 }

@@ -14,6 +14,7 @@
     "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
+    "express-validator": "^5.0.3",
     "fb": "^2.0.0",
     "image-size": "^0.6.2",
     "jsonwebtoken": "^8.1.1",

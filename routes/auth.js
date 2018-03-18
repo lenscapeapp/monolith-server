@@ -1,62 +1,44 @@
-const sequelize = require('sequelize')
 const bcrypt = require('bcrypt')
 const { Router } = require('express')
-const multer = require('multer')
 
 const { Facebook, Auth, Resize, Bucket, File } = require('../functions')
-const { FacebookAuth, LocalAuth, User } = require('../models')
+const { FacebookAuth, LocalAuth, User, sequelize } = require('../models')
 
 const router = new Router()
-const upload = multer({ fileFilter: File.photoFormatFilter })
 
-router.post('/register', upload.single('picture'), async (req, res, next) => {
-  const { password, firstname, lastname, email } = req.body
-  const file = req.file
+router.post('/register',
+  async (req, res, next) => {
+    const { firstname, lastname, password, email } = req.body
+    let hpassword = await bcrypt.hash(password, 10)
 
-  if (!(firstname && lastname && password)) {
-    res.status(400).send({ message: 'Bad request' })
-  }
-
-  let user = null
-  let localauth = null
-
-  let hpassword = await bcrypt.hash(password, 10)
-  try {
-    localauth = await LocalAuth.create({
-      hpassword,
-      User: { firstname, lastname, email }
-    }, {
-      include: [{
-        association: LocalAuth.associations.User
-      }]
-    })
-    user = await localauth.getUser()
-    if (file !== undefined) {
-      let extension = file.mimetype.split('/')[1]
-      let photo = await user.createPhoto({
-        type: 'profile',
-        extension
+    try {
+      await sequelize.transaction(async function (t) {
+        req.authMethod = await LocalAuth.create({
+          hpassword,
+          User: { firstname, lastname, email }
+        }, {
+          transaction: t,
+          include: [{ association: LocalAuth.associations.User }]
+        })
       })
 
-      let pictureUrls = await File.createProfilePictureBundle(file, photo)
+      req.user = await req.authMethod.getUser()
+    } catch (error) {
+      next(error)
+    }
+
+    if (req.file !== undefined) {
+      let extension = req.file.mimetype.split('/')[1]
+      let photo = await req.user.createPhoto({ type: 'profile', extension })
+      let pictureUrls = await File.createProfilePictureBundle(req.file, photo)
 
       req.userPicture = pictureUrls.thumbnail
     }
-  } catch (error) {
-    if (error.name.includes(sequelize.UniqueConstraintError.name)) {
-      return res.status(400).json({
-        message: 'Email is already used.'
-      })
-    } else {
-      console.error(error)
-      return res.status(400).json(error)
-    }
-  }
 
-  req.user = user
-  req.authMethod = localauth
-  next()
-}, Auth.authorize)
+    next()
+  },
+  Auth.authorize
+)
 
 router.post('/login/local', async (req, res, next) => {
   const { email, password } = req.body
