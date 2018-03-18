@@ -21,6 +21,7 @@ module.exports = {
     'thumbnail': 400,
     'resized': 2000
   },
+  IS_PRODUCTION,
   PLACEHOLDER_PROFILE_URL: `${BUCKET_BASEURL}/placeholder/profile.jpg`,
   SECRET: process.env.APP_SECRET || DEFAULT_SECRET
 }
