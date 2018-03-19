@@ -24,14 +24,9 @@ async function createProfilePictureBundle (file, photo) {
     let width = PHOTO_SIZE[size]
     let filename = encodePhoto(photo, size.substring(0, 2))
 
-    try {
-      let { buffer } = await Resize.squareCrop(file, width)
-      urls[size] = await Bucket.storePhoto(buffer, `uploads/${filename}`, file.mimetype)
-    } catch (error) {
-      console.error('functions/file.createPhotoBundle')
-    }
+    let { buffer } = await Resize.squareCrop(file, width)
+    urls[size] = await Bucket.storePhoto(buffer, `uploads/${filename}`, file.mimetype)
   }
-  console.log(Bucket)
   urls.original = await Bucket.storePhoto(file.buffer, `uploads/${encodePhoto(photo, 'og')}`)
 
   return urls
