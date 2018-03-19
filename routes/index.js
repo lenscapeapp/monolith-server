@@ -1,8 +1,13 @@
 const { Router } = require('express')
 
+// Pre-process and valatation router
 const validateRouter = require('./validator')
+
+// Logic router
 const authRouter = require('./auth')
-const errorRouter = require('./errorhandler')
+
+// Response router
+const responseRouter = require('./response')
 
 const router = new Router()
 
@@ -15,7 +20,7 @@ router.use('/', validateRouter)
 
 router.use('/', authRouter)
 
-router.use('/', errorRouter)
+router.use('/', responseRouter)
 
 router.get('/', (req, res) => {
   res.json({ message: 'Health check' })

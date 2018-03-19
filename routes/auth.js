@@ -48,33 +48,25 @@ router.post('/register',
 router.post('/login/local', async (req, res, next) => {
   const { email, password } = req.body
 
-  if (!(email && password)) {
-    res.status(400).send({ message: 'Email or Password is missing' })
-  }
-
-  let localauth = null
-  let user = null
   try {
-    user = await User.findOne({
-      where: { email }
+    req.states.user = await User.findOne({
+      where: { email },
+      include: [{ model: LocalAuth }]
     })
-    localauth = await user.getLocalAuth()
   } catch (error) {
     res.statusCode = 500
     return next(error)
   }
 
-  if (!localauth) {
-    return res.status(401).json({ message: 'Invalid credential' })
+  if (req.states.user === null || req.states.user.LocalAuth === null) {
+    return res.status(401).json({ message: 'Email or Password is incorrect' })
   }
 
-  let authenticated = await bcrypt.compare(password, localauth.hpassword)
+  let authenticated = await bcrypt.compare(password, req.states.user.LocalAuth.hpassword)
   if (!authenticated) {
-    return res.status(401).json({ message: 'Invalid credential' })
+    return res.status(401).json({ message: 'Email or Password is incorrect' })
   }
 
-  req.user = user
-  req.authMethod = localauth
   next()
 }, Auth.authorize)
 
