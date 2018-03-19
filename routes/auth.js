@@ -22,7 +22,7 @@ router.post('/register',
         })
       })
 
-      req.user = await req.authMethod.getUser()
+      req.states.user = await req.authMethod.getUser()
     } catch (error) {
       res.statusCode = 500
       return next(error)
@@ -31,7 +31,7 @@ router.post('/register',
     if (req.file !== undefined) {
       try {
         let extension = req.file.mimetype.split('/')[1]
-        let photo = await req.user.createPhoto({ type: 'profile', extension })
+        let photo = await req.states.user.createPhoto({ type: 'profile', extension })
         let pictureUrls = await File.createProfilePictureBundle(req.file, photo)
         req.userPicture = pictureUrls.thumbnail
       } catch (error) {
@@ -103,17 +103,15 @@ router.post('/login/facebook', async (req, res, next) => {
         type: 'profile',
         extension: 'jpg'
       })
-      let file = { buffer: pictureBuffer, mimetype: 'image/jgp' }
-      let pictureBundle = await File.createProfilePictureBundle(file, photo)
-      req.userPicture = pictureBundle.thumbnail
+      let file = { buffer: pictureBuffer, mimetype: 'image/jpg' }
+      await File.createProfilePictureBundle(file, photo)
     }
 
-    req.user = user
-    req.authMethod = facebookAuth
+    req.states.user = user
     next()
   } catch (error) {
     res.statusCode = 500
-    next(error)
+    return next(error)
   }
 }, Auth.authorize)
 
