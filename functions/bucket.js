@@ -6,7 +6,7 @@ const storage = new Storage({ projectId: GCLOUD_PROJECT_ID })
 const bucket = storage.bucket(BUCKET_NAME)
 
 function getBucketURL (path) {
-  return `${BUCKET_BASEURL}/${BUCKET_NAME}/${path}`
+  return `${BUCKET_BASEURL}/${path}`
 }
 
 async function storePhoto (buffer, path, contentType = 'image/jpeg') {

@@ -1,92 +1,72 @@
-const sequelize = require('sequelize')
 const bcrypt = require('bcrypt')
 const { Router } = require('express')
-const multer = require('multer')
 
 const { Facebook, Auth, Resize, Bucket, File } = require('../functions')
-const { FacebookAuth, LocalAuth, User } = require('../models')
+const { FacebookAuth, LocalAuth, User, sequelize } = require('../models')
 
 const router = new Router()
-const upload = multer({ fileFilter: File.photoFormatFilter })
 
-router.post('/register', upload.single('picture'), async (req, res, next) => {
-  const { password, firstname, lastname, email } = req.body
-  const file = req.file
+router.post('/register',
+  async (req, res, next) => {
+    const { firstname, lastname, password, email } = req.body
+    let hpassword = await bcrypt.hash(password, 10)
 
-  if (!(firstname && lastname && password)) {
-    res.status(400).send({ message: 'Bad request' })
-  }
-
-  let user = null
-  let localauth = null
-
-  let hpassword = await bcrypt.hash(password, 10)
-  try {
-    localauth = await LocalAuth.create({
-      hpassword,
-      User: { firstname, lastname, email }
-    }, {
-      include: [{
-        association: LocalAuth.associations.User
-      }]
-    })
-    user = await localauth.getUser()
-    if (file !== undefined) {
-      let extension = file.mimetype.split('/')[1]
-      let photo = await user.createPhoto({
-        type: 'profile',
-        extension
+    try {
+      await sequelize.transaction(async function (t) {
+        req.authMethod = await LocalAuth.create({
+          hpassword,
+          User: { firstname, lastname, email }
+        }, {
+          transaction: t,
+          include: [{ association: LocalAuth.associations.User }]
+        })
       })
 
-      let pictureUrls = await File.createProfilePictureBundle(file, photo)
-
-      req.userPicture = pictureUrls.thumbnail
+      req.user = await req.authMethod.getUser()
+    } catch (error) {
+      res.statusCode = 500
+      return next(error)
     }
-  } catch (error) {
-    if (error.name.includes(sequelize.UniqueConstraintError.name)) {
-      return res.status(400).json({
-        message: 'Email is already used.'
-      })
-    } else {
-      console.error(error)
-      return res.status(400).json(error)
-    }
-  }
 
-  req.user = user
-  req.authMethod = localauth
-  next()
-}, Auth.authorize)
+    if (req.file !== undefined) {
+      try {
+        let extension = req.file.mimetype.split('/')[1]
+        let photo = await req.user.createPhoto({ type: 'profile', extension })
+        let pictureUrls = await File.createProfilePictureBundle(req.file, photo)
+        req.userPicture = pictureUrls.thumbnail
+      } catch (error) {
+        res.statusCode = 500
+        return next(error)
+      }
+    }
+
+    next()
+  },
+  Auth.authorize
+)
 
 router.post('/login/local', async (req, res, next) => {
   const { email, password } = req.body
 
-  if (!(email && password)) {
-    res.status(400).send({ message: 'Email or Password is missing' })
-  }
-
-  let localauth = null
-  let user = null
   try {
-    user = await User.findOne({
-      where: { email }
+    req.states.user = await User.findOne({
+      where: { email },
+      include: [{ model: LocalAuth }]
     })
-    localauth = await user.getLocalAuth()
   } catch (error) {
-    console.error(error)
+    res.statusCode = 500
+    return next(error)
   }
 
-  if (!localauth) {
-    return res.status(401).json({ message: 'Invalid credential' })
+  if (req.states.user === null || req.states.user.LocalAuth === null) {
+    return res.status(401).json({ message: 'Email or Password is incorrect' })
   }
 
-  let authenticated = await bcrypt.compare(password, localauth.hpassword)
+  let authenticated = await bcrypt.compare(password, req.states.user.LocalAuth.hpassword)
   if (!authenticated) {
-    return res.status(401).json({ message: 'Invalid credential' })
+    return res.status(401).json({ message: 'Email or Password is incorrect' })
   }
 
-  req.user = user
-  req.authMethod = localauth
   next()
 }, Auth.authorize)
 
@@ -132,11 +112,8 @@ router.post('/login/facebook', async (req, res, next) => {
     req.authMethod = facebookAuth
     next()
   } catch (error) {
-    console.log(error)
-    return res.status(500).json({
-      message: 'Oops! Something went wrong',
-      error
-    })
+    res.statusCode = 500
+    next(error)
   }
 }, Auth.authorize)
 

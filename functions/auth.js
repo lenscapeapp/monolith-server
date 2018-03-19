@@ -16,7 +16,7 @@ const jwtOptions = {
 function now () { return Math.floor(Date.now() / 1000) }
 
 async function authorize (req, res) {
-  let { user } = req
+  let { user } = req.states
 
   let payload = {
     id: user.id,
@@ -24,15 +24,13 @@ async function authorize (req, res) {
   }
   let token = jwt.sign(payload, jwtOptions.secretOrKey)
 
-  if (!req.userPicture) {
-    let [picture] = await user.getPhotos({ type: 'profile', active: true })
+  let [picture] = await user.getPhotos({ type: 'profile', active: true })
 
-    if (picture !== undefined) {
-      let name = filename.encodePhoto(picture)
-      req.userPicture = bucket.getBucketURL(`uploads/${name}`)
-    } else {
-      req.userPicture = PLACEHOLDER_PROFILE_URL
-    }
+  let pictureUrl = PLACEHOLDER_PROFILE_URL
+
+  if (picture !== undefined) {
+    let name = filename.encodePhoto(picture, 'th')
+    pictureUrl = bucket.getBucketURL(`uploads/${name}`)
   }
 
   return res.json({
@@ -41,7 +39,7 @@ async function authorize (req, res) {
       firstname: user.firstname,
       lastname: user.lastname,
       email: user.email,
-      picture: req.userPicture
+      picture: pictureUrl
     },
     message: 'Authenticated',
     token
