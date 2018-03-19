@@ -12,15 +12,11 @@ function getBucketURL (path) {
 async function storePhoto (buffer, path, contentType = 'image/jpeg') {
   let bucketFile = bucket.file(path)
 
-  try {
-    await bucketFile.save(buffer)
-    await bucketFile.setMetadata({
-      contentType
-    })
-    await bucketFile.makePublic()
-  } catch (err) {
-    console.error('functions/bucket.storePhoto', err)
-  }
+  await bucketFile.save(buffer)
+  await bucketFile.setMetadata({
+    contentType
+  })
+  await bucketFile.makePublic()
 
   return getBucketURL(path)
 }
@@ -31,12 +27,8 @@ async function upload (remotePath, bucketPath) {
     contentType: 'image/jpg'
   }
 
-  try {
-    let [uploadedFile] = await bucket.upload(remotePath, options)
-    await uploadedFile.makePublic()
-  } catch (error) {
-    console.error('functions/bucket.upload')
-  }
+  let [uploadedFile] = await bucket.upload(remotePath, options)
+  await uploadedFile.makePublic()
 
   return getBucketURL(bucketPath)
 }

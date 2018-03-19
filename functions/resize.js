@@ -68,15 +68,13 @@ async function squareCrop (file, width) {
   let query = querystring.stringify({ operations: JSON.stringify(ops) })
   let baseUrl = `${IMAGINARY_BASEURL}/pipeline`
   let extractBuffer
-  try {
-    extractBuffer = await request.post({
-      uri: `${baseUrl}?${query}`,
-      formData,
-      encoding: null
-    })
-  } catch (error) {
-    console.error('functions/resize.squareCrop', error)
-  }
+
+  extractBuffer = await request.post({
+    uri: `${baseUrl}?${query}`,
+    formData,
+    encoding: null
+  })
+
   return {
     buffer: extractBuffer
   }
