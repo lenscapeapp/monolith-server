@@ -48,7 +48,7 @@ async function authorize (req, res) {
 
 passport.use(new JwtStrategy(jwtOptions, async (payload, done) => {
   try {
-    let user = await User.findOne({ id: payload.id })
+    let user = await User.findOne({ where: { id: payload.id } })
     done(null, user)
   } catch (error) {
     done(error)
