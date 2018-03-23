@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt')
 const { Router } = require('express')
 
 const { Facebook, Auth, Resize, Bucket, File } = require('../functions')
-const { FacebookAuth, LocalAuth, User, sequelize } = require('../models')
+const { FacebookAuth, LocalAuth, User, sequelize, Sequelize } = require('../models')
 
 const router = new Router()
 
@@ -11,36 +11,32 @@ router.post('/register',
     const { firstname, lastname, password, email } = req.body
     let hpassword = await bcrypt.hash(password, 10)
 
-    try {
-      await sequelize.transaction(async function (t) {
-        req.authMethod = await LocalAuth.create({
+    await sequelize.transaction(async function (t) {
+      try {
+        let localauth = await LocalAuth.create({
           hpassword,
           User: { firstname, lastname, email }
         }, {
           transaction: t,
           include: [{ association: LocalAuth.associations.User }]
         })
-      })
 
-      req.states.user = await req.authMethod.getUser()
-    } catch (error) {
-      res.statusCode = 500
-      return next(error)
-    }
+        req.states.user = localauth.User
 
-    if (req.file !== undefined) {
-      try {
-        let extension = req.file.mimetype.split('/')[1]
-        let photo = await req.states.user.createPhoto({ type: 'profile', extension })
-        let pictureUrls = await File.createProfilePictureBundle(req.file, photo)
-        req.userPicture = pictureUrls.thumbnail
+        if (req.file !== undefined) {
+          let extension = req.file.mimetype.split('/')[1]
+          let photo = await req.states.user.createCurrentProfilePhoto({ type: 'profile', extension }, { transaction: t })
+          let pictureUrls = await photo.upload(req.file, req.file.mimetype)
+          req.userPicture = pictureUrls.thumbnail
+        }
+        next()
       } catch (error) {
+        console.log(error)
         res.statusCode = 500
-        return next(error)
+        next(error)
+        throw error
       }
-    }
-
-    next()
+    })
   },
   Auth.authorize
 )
@@ -99,12 +95,11 @@ router.post('/login/facebook', async (req, res, next) => {
     }
 
     if (!picture.data.is_silhouette & uCreated) {
-      let photo = await user.createPhoto({
+      let photo = await user.createCurrentProfilePhoto({
         type: 'profile',
         extension: 'jpg'
       })
-      let file = { buffer: pictureBuffer, mimetype: 'image/jpg' }
-      await File.createProfilePictureBundle(file, photo)
+      await photo.upload({ buffer: pictureBuffer }, 'image/jpg')
     }
 
     req.states.user = user

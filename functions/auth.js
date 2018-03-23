@@ -24,11 +24,11 @@ async function authorize (req, res) {
   }
   let token = jwt.sign(payload, jwtOptions.secretOrKey)
 
-  let [picture] = await user.getPhotos({ type: 'profile', active: true })
+  let picture = await user.getCurrentProfilePhoto()
 
   let pictureUrl = PLACEHOLDER_PROFILE_URL
 
-  if (picture !== undefined) {
+  if (picture !== null) {
     let name = filename.encodePhoto(picture, 'th')
     pictureUrl = bucket.getBucketURL(`uploads/${name}`)
   }

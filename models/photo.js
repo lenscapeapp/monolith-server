@@ -1,7 +1,9 @@
 'use strict'
 
 const { PHOTO_SIZE } = require('../config/constants')
-const { File } = require('../functions')
+const File = require('../functions/file')
+const Resize = require('../functions/resize')
+const Bucket = require('../functions/bucket')
 
 module.exports = (sequelize, DataTypes) => {
   var Photo = sequelize.define('Photo', {
@@ -48,12 +50,37 @@ module.exports = (sequelize, DataTypes) => {
     return up !== null
   }
 
-  Photo.getUrls = async function () {
-    let size = Object.keys(PHOTO_SIZE)
+  Photo.prototype.getUrls = async function () {
+    let sizes = Object.keys(PHOTO_SIZE)
 
-    return size.reduce((accumulator, e) => {
+    return sizes.reduce((accumulator, e) => {
       accumulator[e] = File.encodePhoto(this, e.substring(0, 2))
     }, {})
+  }
+
+  Photo.prototype.upload = async function (file, contentType) {
+    let sizes = Object.keys(PHOTO_SIZE)
+    let urls = await Promise.all(sizes.map(async (size) => {
+      let width = PHOTO_SIZE[size]
+      let resized = null
+
+      if (this.type === 'profile') {
+        resized = await Resize.squareCrop(file, width)
+      } else if (this.type === 'photo') {
+        resized = await Resize.keepRatio(file, width)
+      }
+
+      let url = await Bucket.storePhoto(resized.buffer, `uploads/${File.encodePhoto(this, size.substring(0, 2))}`, contentType)
+
+      return url
+    }))
+
+    let urlMap = {}
+    sizes.forEach((size, index) => {
+      urlMap[size] = urls[index]
+    })
+
+    return urlMap
   }
 
   return Photo
