@@ -18,6 +18,7 @@ router.use('/', validateRouter)
 
 router.use('/', authRouter)
 router.use('/', userRouter)
+router.use('/', require('./photo'))
 
 router.get('/', (req, res) => {
   res.json({ message: 'Health check' })

@@ -6,6 +6,7 @@ const authRouter = require('./auth')
 const router = new Router()
 
 router.use('/', authRouter)
+router.use('/', require('./photo'))
 
 router.use('*', (req, res, next) => {
   const result = validationResult(req)
