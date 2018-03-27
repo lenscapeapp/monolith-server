@@ -32,7 +32,7 @@ app.use((err, req, res, next) => {
       res.status(res.statusCode).json(err)
     }
   } else {
-    res.send(res.statusCode).json({
+    res.sendStatus(res.statusCode).json({
       message: res.message
     })
   }

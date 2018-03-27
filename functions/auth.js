@@ -24,11 +24,11 @@ async function authorize (req, res) {
   }
   let token = jwt.sign(payload, jwtOptions.secretOrKey)
 
-  let [picture] = await user.getPhotos({ type: 'profile', active: true })
+  let picture = await user.getCurrentProfilePhoto()
 
   let pictureUrl = PLACEHOLDER_PROFILE_URL
 
-  if (picture !== undefined) {
+  if (picture !== null) {
     let name = filename.encodePhoto(picture, 'th')
     pictureUrl = bucket.getBucketURL(`uploads/${name}`)
   }
@@ -48,7 +48,7 @@ async function authorize (req, res) {
 
 passport.use(new JwtStrategy(jwtOptions, async (payload, done) => {
   try {
-    let user = await User.findOne({ id: payload.id })
+    let user = await User.findOne({ where: { id: payload.id } })
     done(null, user)
   } catch (error) {
     done(error)

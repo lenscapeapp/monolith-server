@@ -1,4 +1,7 @@
 'use strict'
+
+const { PLACEHOLDER_PROFILE_URL } = require('../config/constants')
+
 module.exports = (sequelize, DataTypes) => {
   var User = sequelize.define('User', {
     firstname: DataTypes.STRING,
@@ -24,6 +27,19 @@ module.exports = (sequelize, DataTypes) => {
     User.hasMany(models.Photo, {
       foreignKey: 'owner_id'
     })
+    User.hasOne(models.Photo, {
+      as: 'currentProfilePhoto',
+      foreignKey: 'current_profile_id'
+    })
+  }
+
+  User.prototype.getProfile = async function () {
+    let profile = this.get({ plain: true })
+
+    let profilePhoto = await this.getCurrentProfilePhoto()
+    profile.photo = profilePhoto ? profilePhoto.thumbnail : PLACEHOLDER_PROFILE_URL
+
+    return profile
   }
 
   return User

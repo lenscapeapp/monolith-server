@@ -4,6 +4,7 @@ const { Router } = require('express')
 const { body } = require('express-validator/check')
 
 const { File } = require('../../functions')
+const { User } = require('../../models')
 
 const router = new Router()
 const upload = multer({ fileFilter: File.photoFormatFilter })
@@ -17,7 +18,12 @@ router.post('/register', upload.single('picture'),
     .matches(/^[a-z]+$/i).withMessage('lastname can contain only characters'),
   body('email')
     .exists().withMessage('email is missing')
-    .isEmail().withMessage('email must be an email'),
+    .isEmail().withMessage('email must be an email')
+    .custom(value => {
+      return User.findOne({ where: { email: value } }).then(user => {
+        if (user !== null) throw new Error('This email is already used.')
+      })
+    }),
   body('password')
     .exists().withMessage('password is missing')
     .isLength({ min: 8, max: 30 }).withMessage('password must be 8-30 characters long')
