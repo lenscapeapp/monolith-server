@@ -55,6 +55,7 @@ module.exports = (sequelize, DataTypes) => {
 
     return sizes.reduce((accumulator, e) => {
       accumulator[e] = File.encodePhoto(this, e.substring(0, 2))
+      return accumulator
     }, {})
   }
 

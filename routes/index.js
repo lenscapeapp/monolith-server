@@ -24,6 +24,28 @@ router.use('/', Auth.authenticate)
 router.use('/', userRouter)
 router.use('/', require('./photo'))
 
+router.use('/', (req, res, next) => {
+  let { pageData, pageTotalCount } = req.states
+  let { page, size } = req.query
+  let indexOffset = (page - 1) * size
+
+  if (pageTotalCount) {
+    res.json({
+      pagination: {
+        page_information: {
+          number: page,
+          size: size
+        },
+        first: indexOffset + 1,
+        last: indexOffset + pageData.length,
+        total_number_of_page: Math.ceil(pageTotalCount / size),
+        total_number_of_entities: pageTotalCount
+      },
+      data: pageData
+    })
+  }
+})
+
 router.get('/', (req, res) => {
   res.json({ message: 'Health check' })
 })

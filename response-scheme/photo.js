@@ -3,6 +3,7 @@ const userScheme = require('./user')
 class PhotoResponse {
   constructor (photo) {
     this.photo = photo
+
     this.response = {
       id: photo.id,
       name: '', // photo.get('name')
