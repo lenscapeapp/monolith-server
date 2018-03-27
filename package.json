@@ -16,6 +16,7 @@
     "express": "^4.16.2",
     "express-validator": "^5.0.3",
     "fb": "^2.0.0",
+    "geopoint": "^1.0.1",
     "image-size": "^0.6.2",
     "jsonwebtoken": "^8.1.1",
     "koa-passport": "^4.0.1",
