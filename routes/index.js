@@ -1,5 +1,7 @@
 const { Router } = require('express')
 
+const { Auth } = require('../functions')
+
 // Pre-process and valatation router
 const validateRouter = require('./validator')
 
@@ -17,6 +19,8 @@ router.use('*', (req, res, next) => {
 router.use('/', validateRouter)
 
 router.use('/', authRouter)
+
+router.use('/', Auth.authenticate)
 router.use('/', userRouter)
 router.use('/', require('./photo'))
 
