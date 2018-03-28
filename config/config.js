@@ -14,5 +14,12 @@ module.exports = {
     host: process.env.POSTGRES_DB_HOST,
     database: 'lenscape_prod',
     dialect: 'postgres'
+  },
+  test: {
+    username: 'postgres',
+    password: '',
+    database: 'lenscape_test',
+    host: 'localhost',
+    dialect: 'postgres'
   }
 }

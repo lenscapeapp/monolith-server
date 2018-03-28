@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
         - name: lenscape-monolith-server
-          image: gcr.io/lenscapeapp/github-lenscapeapp-monolith-server:4175a5a49ca97829dcea1c904dab6be72fac0bcf
+          image: gcr.io/lenscapeapp/github-lenscapeapp-monolith-server:4
           imagePullPolicy: Always 
           ports:
             - containerPort: 8080

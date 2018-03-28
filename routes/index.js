@@ -11,6 +11,11 @@ const userRouter = require('./user')
 
 const router = new Router()
 
+// Health Check path
+router.get('/', (req, res) => {
+  res.json({ message: 'Health check' })
+})
+
 router.use('*', (req, res, next) => {
   req.states = {}
   next()
@@ -44,10 +49,6 @@ router.use('/', (req, res, next) => {
       data: pageData
     })
   }
-})
-
-router.get('/', (req, res) => {
-  res.json({ message: 'Health check' })
 })
 
 module.exports = router
