@@ -11,6 +11,10 @@ const userRouter = require('./user')
 
 const router = new Router()
 
+router.get('/', (req, res) => {
+  res.json({ message: 'Health check' })
+})
+
 router.use('*', (req, res, next) => {
   req.states = {}
   next()
@@ -20,6 +24,7 @@ router.use('/', validateRouter)
 
 router.use('/', authRouter)
 
+// router require authencitation
 router.use('/', Auth.authenticate)
 router.use('/', userRouter)
 router.use('/', require('./photo'))
@@ -44,10 +49,6 @@ router.use('/', (req, res, next) => {
       data: pageData
     })
   }
-})
-
-router.get('/', (req, res) => {
-  res.json({ message: 'Health check' })
 })
 
 module.exports = router
