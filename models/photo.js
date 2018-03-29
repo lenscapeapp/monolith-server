@@ -1,6 +1,6 @@
 'use strict'
 
-const { PHOTO_SIZE } = require('../config/constants')
+const { PHOTO_SIZE, BUCKET_BASEURL } = require('../config/constants')
 const File = require('../functions/file')
 const Resize = require('../functions/resize')
 const Bucket = require('../functions/bucket')
@@ -50,13 +50,16 @@ module.exports = (sequelize, DataTypes) => {
     return up !== null
   }
 
-  Photo.prototype.getUrls = async function () {
+  Photo.prototype.getUrls = function () {
     let sizes = Object.keys(PHOTO_SIZE)
+    let baseObj = {
+      original: `${BUCKET_BASEURL}/uploads/${File.encodePhoto(this, 'og')}`
+    }
 
     return sizes.reduce((accumulator, e) => {
-      accumulator[e] = File.encodePhoto(this, e.substring(0, 2))
+      accumulator[e] = `${BUCKET_BASEURL}/uploads/${File.encodePhoto(this, e.substring(0, 2))}`
       return accumulator
-    }, {})
+    }, baseObj)
   }
 
   Photo.prototype.upload = async function (file, contentType) {
@@ -80,6 +83,9 @@ module.exports = (sequelize, DataTypes) => {
     sizes.forEach((size, index) => {
       urlMap[size] = urls[index]
     })
+
+    let originalUrl = await Bucket.storePhoto(file.buffer, `uploads/${File.encodePhoto(this, 'og')}`, contentType)
+    urlMap.original = originalUrl
 
     return urlMap
   }

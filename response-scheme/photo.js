@@ -10,6 +10,7 @@ class PhotoResponse {
       number_of_like: 0,
       thumbnail_link: photo.getUrls().thumbnail,
       picture_link: photo.getUrls().resized,
+      original_link: photo.getUrls().original,
       location: {
         name: '',
         latitude: photo.lat,
