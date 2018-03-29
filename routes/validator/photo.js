@@ -42,7 +42,25 @@ router.post('/photo', upload.single('picture'),
     .isLatLong().withMessage('latlong value is invalid'),
   (req, res, next) => {
     if (req.file) return next()
-    res.status(400).json({ message: 'picture is missing' })
+    if (!req.body.picture) {
+      return res.status(400).json({ message: 'picture is missing' })
+    }
+
+    let buffer = Buffer.from(req.body.picture, 'base64')
+    let fileSignature = buffer.slice(0, 2).toString('hex')
+    let isJPG = fileSignature === 'ffd8'
+    let isPNG = fileSignature === '8950'
+
+    if (!isJPG && !isPNG) {
+      return res.status(400).json({ message: 'Only JPG/PNG is allowed' })
+    }
+
+    let mimetype = 'image/' + (isJPG ? 'jpg' : (isPNG ? 'png' : '*'))
+    req.file = {
+      mimetype,
+      buffer
+    }
+    next()
   }
 )
 
