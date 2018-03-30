@@ -26,7 +26,27 @@ router.post('/register', upload.single('picture'),
     }),
   body('password')
     .exists().withMessage('password is missing')
-    .isLength({ min: 8, max: 30 }).withMessage('password must be 8-30 characters long')
+    .isLength({ min: 8, max: 30 }).withMessage('password must be 8-30 characters long'),
+  (req, res, next) => {
+    if (req.file) return next()
+    if (!req.body.picture) return next()
+
+    let buffer = Buffer.from(req.body.picture, 'base64')
+    let fileSignature = buffer.slice(0, 2).toString('hex')
+    let isJPG = fileSignature === 'ffd8'
+    let isPNG = fileSignature === '8950'
+
+    if (!isJPG && !isPNG) {
+      return res.status(400).json({ message: 'Only JPG/PNG is allowed' })
+    }
+
+    let mimetype = 'image/' + (isJPG ? 'jpg' : (isPNG ? 'png' : '*'))
+    req.file = {
+      mimetype,
+      buffer
+    }
+    next()
+  }
 )
 
 router.post('/login/local'
