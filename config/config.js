@@ -20,6 +20,7 @@ module.exports = {
     password: '',
     database: 'lenscape_test',
     host: 'localhost',
-    dialect: 'postgres'
+    dialect: 'postgres',
+    logging: false
   }
 }
