@@ -16,17 +16,21 @@ router.get('/aroundme/photos',
     .isLatLong().withMessage('latlong is not valid'),
   query('page')
     .optional()
-    .isInt().withMessage('page must be an integer'),
+    .isInt().withMessage('page must be an integer')
+    .toInt(),
   query('size')
     .optional()
-    .isInt().withMessage('size must be an integer'),
+    .isInt().withMessage('size must be an integer')
+    .toInt(),
   query('startId')
     .optional()
-    .isInt().withMessage('start ID must be an integer'),
+    .isInt().withMessage('start ID must be an integer')
+    .toInt(),
   query('month')
     .optional()
     .isInt()
-    .isLength({ min: 0, max: 12 }).withMessage('month must be an integer between 0 and 12 (inclusive)'),
+    .isLength({ min: 0, max: 12 }).withMessage('month must be an integer between 0 and 12 (inclusive)')
+    .toInt(),
   (req, res, next) => {
     req.query.page = req.query.page || 1
     req.query.size = req.query.size || DEFAULT_PAGE_SIZE

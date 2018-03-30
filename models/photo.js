@@ -8,8 +8,6 @@ const Bucket = require('../functions/bucket')
 module.exports = (sequelize, DataTypes) => {
   var Photo = sequelize.define('Photo', {
     owner_id: DataTypes.INTEGER,
-    lat: DataTypes.DOUBLE,
-    long: DataTypes.DOUBLE,
     type: {
       type: DataTypes.ENUM('profile', 'photo'),
       allowNull: false
@@ -32,6 +30,10 @@ module.exports = (sequelize, DataTypes) => {
           }
         }
       }
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false
     }
   }, {})
   Photo.associate = function (models) {
@@ -42,6 +44,10 @@ module.exports = (sequelize, DataTypes) => {
     Photo.belongsTo(models.User, {
       as: 'currentProfile',
       foreignKey: 'current_profile_id'
+    })
+    Photo.belongsTo(models.LocationTag, {
+      as: 'location',
+      foreignKey: 'locationtag_id'
     })
   }
 
