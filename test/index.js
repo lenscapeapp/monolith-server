@@ -18,4 +18,22 @@ describe('Health check', () => {
         done()
       })
   })
+
+  it('should be able to register', (done) => {
+    chai.request(server)
+      .post('/register')
+      .type('form')
+      .send({
+        firstname: 'chin',
+        lastname: 'nonae',
+        email: 'chinnonae@lenscape.me',
+        password: '12345678'
+      })
+      .end((err, res) => {
+        if (err) throw err
+        console.log(res)
+        res.should.have.status(200)
+        done()
+      })
+  })
 })
