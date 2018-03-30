@@ -14,14 +14,14 @@ class PhotoResponse {
       picture_link: photo.getUrls().resized,
       original_link: photo.getUrls().original,
       location: {
-        name: photo.location.name,
-        latitude: photo.location.lat,
-        longitude: photo.location.long
+        name: photo.LocationTag.name,
+        latitude: photo.LocationTag.lat,
+        longitude: photo.LocationTag.long
       }
     }
 
-    if (photo.owner) {
-      this.response.owner = userScheme(photo.owner)
+    if (photo.Owner) {
+      this.response.Owner = userScheme(photo.Owner)
     }
   }
 
@@ -29,7 +29,7 @@ class PhotoResponse {
     if (!current) { return this }
     if (!this.response.location) { return this }
 
-    let photoPoint = new GeoPoint(this.photo.location.lat, this.photo.location.long)
+    let photoPoint = new GeoPoint(this.photo.LocationTag.lat, this.photo.LocationTag.long)
     this.response.location.distance = Math.ceil(current.distanceTo(photoPoint, true) * 1000) / 1000
     this.response.location.is_near = this.response.location.distance <= 2
 

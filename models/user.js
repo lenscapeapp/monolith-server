@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'owner_id'
     })
     User.hasOne(models.Photo, {
-      as: 'currentProfilePhoto',
+      as: 'CurrentProfilePhoto',
       foreignKey: 'current_profile_id'
     })
   }

@@ -44,6 +44,10 @@ router.post('/photo', upload.single('picture'),
   body('latlong')
     .exists().withMessage('latlong is missing')
     .isLatLong().withMessage('latlong value is invalid'),
+  body('image_name')
+    .exists().withMessage('image_name is missing'),
+  body('location_name')
+    .exists().withMessage('location_name is missing'),
   (req, res, next) => {
     if (req.file) return next()
     if (!req.body.picture) {

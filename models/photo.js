@@ -38,15 +38,14 @@ module.exports = (sequelize, DataTypes) => {
   }, {})
   Photo.associate = function (models) {
     Photo.belongsTo(models.User, {
-      as: 'owner',
+      as: 'Owner',
       foreignKey: 'owner_id'
     })
     Photo.belongsTo(models.User, {
-      as: 'currentProfile',
+      as: 'CurrentProfile',
       foreignKey: 'current_profile_id'
     })
     Photo.belongsTo(models.LocationTag, {
-      as: 'location',
       foreignKey: 'locationtag_id'
     })
   }
@@ -79,7 +78,7 @@ module.exports = (sequelize, DataTypes) => {
       } else if (this.type === 'photo') {
         resized = await Resize.keepRatio(file, width)
       }
-
+      console.log(this)
       let url = await Bucket.storePhoto(resized.buffer, `uploads/${File.encodePhoto(this, size.substring(0, 2))}`, contentType)
 
       return url
