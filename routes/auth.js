@@ -25,7 +25,12 @@ router.post('/register',
 
         if (req.file !== undefined) {
           let extension = req.file.mimetype.split('/')[1]
-          let photo = await req.states.user.createCurrentProfilePhoto({ type: 'profile', extension }, { transaction: t })
+          let photo = await req.states.user.createCurrentProfilePhoto({
+            type: 'profile',
+            extension,
+            name: '',
+            owner_id: req.states.user.id
+          }, { transaction: t })
           let pictureUrls = await photo.upload(req.file, req.file.mimetype)
           req.userPicture = pictureUrls.thumbnail
         }
@@ -97,7 +102,8 @@ router.post('/login/facebook', async (req, res, next) => {
     if (!picture.data.is_silhouette & uCreated) {
       let photo = await user.createCurrentProfilePhoto({
         type: 'profile',
-        extension: 'jpg'
+        extension: 'jpg',
+        name: ''
       })
       await photo.upload({ buffer: pictureBuffer }, 'image/jpg')
     }

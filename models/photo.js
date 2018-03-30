@@ -1,6 +1,6 @@
 'use strict'
 
-const { PHOTO_SIZE } = require('../config/constants')
+const { PHOTO_SIZE, BUCKET_BASEURL } = require('../config/constants')
 const File = require('../functions/file')
 const Resize = require('../functions/resize')
 const Bucket = require('../functions/bucket')
@@ -8,8 +8,6 @@ const Bucket = require('../functions/bucket')
 module.exports = (sequelize, DataTypes) => {
   var Photo = sequelize.define('Photo', {
     owner_id: DataTypes.INTEGER,
-    lat: DataTypes.DOUBLE,
-    long: DataTypes.DOUBLE,
     type: {
       type: DataTypes.ENUM('profile', 'photo'),
       allowNull: false
@@ -32,16 +30,23 @@ module.exports = (sequelize, DataTypes) => {
           }
         }
       }
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false
     }
   }, {})
   Photo.associate = function (models) {
     Photo.belongsTo(models.User, {
-      as: 'owner',
+      as: 'Owner',
       foreignKey: 'owner_id'
     })
     Photo.belongsTo(models.User, {
-      as: 'currentProfile',
+      as: 'CurrentProfile',
       foreignKey: 'current_profile_id'
+    })
+    Photo.belongsTo(models.LocationTag, {
+      foreignKey: 'locationtag_id'
     })
   }
 
@@ -50,13 +55,16 @@ module.exports = (sequelize, DataTypes) => {
     return up !== null
   }
 
-  Photo.prototype.getUrls = async function () {
+  Photo.prototype.getUrls = function () {
     let sizes = Object.keys(PHOTO_SIZE)
+    let baseObj = {
+      original: `${BUCKET_BASEURL}/uploads/${File.encodePhoto(this, 'og')}`
+    }
 
     return sizes.reduce((accumulator, e) => {
-      accumulator[e] = File.encodePhoto(this, e.substring(0, 2))
+      accumulator[e] = `${BUCKET_BASEURL}/uploads/${File.encodePhoto(this, e.substring(0, 2))}`
       return accumulator
-    }, {})
+    }, baseObj)
   }
 
   Photo.prototype.upload = async function (file, contentType) {
@@ -70,7 +78,7 @@ module.exports = (sequelize, DataTypes) => {
       } else if (this.type === 'photo') {
         resized = await Resize.keepRatio(file, width)
       }
-
+      console.log(this)
       let url = await Bucket.storePhoto(resized.buffer, `uploads/${File.encodePhoto(this, size.substring(0, 2))}`, contentType)
 
       return url
@@ -80,6 +88,9 @@ module.exports = (sequelize, DataTypes) => {
     sizes.forEach((size, index) => {
       urlMap[size] = urls[index]
     })
+
+    let originalUrl = await Bucket.storePhoto(file.buffer, `uploads/${File.encodePhoto(this, 'og')}`, contentType)
+    urlMap.original = originalUrl
 
     return urlMap
   }

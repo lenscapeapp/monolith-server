@@ -11,6 +11,7 @@ const userRouter = require('./user')
 
 const router = new Router()
 
+
 // Health Check path
 router.get('/', (req, res) => {
   res.json({ message: 'Health check' })
@@ -25,6 +26,7 @@ router.use('/', validateRouter)
 
 router.use('/', authRouter)
 
+// router require authencitation
 router.use('/', Auth.authenticate)
 router.use('/', userRouter)
 router.use('/', require('./photo'))

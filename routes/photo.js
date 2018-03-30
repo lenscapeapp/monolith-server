@@ -1,7 +1,7 @@
 const GeoPoint = require('geopoint')
 const { Router } = require('express')
 
-const { Photo, User, sequelize } = require('../models')
+const { Photo, User, sequelize, LocationTag } = require('../models')
 const resScheme = require('../response-scheme')
 const Op = sequelize.Op
 
@@ -16,29 +16,28 @@ router.get('/aroundme/photos', async (req, res, next) => {
     let {count: total, rows: photos} = await Photo.findAndCount({
       where: {
         type: 'photo',
-        lat: {
-          [Op.between]: [swBound.latitude(), neBound.latitude()]
-        },
-        long: {
-          [Op.between]: [swBound.longitude(), neBound.longitude()]
-        }
+        '$LocationTag.lat$': { [Op.between]: [swBound.latitude(), neBound.latitude()] },
+        '$LocationTag.long$': { [Op.between]: [swBound.longitude(), neBound.longitude()] }
       },
       include: [{
         model: User,
-        as: 'owner',
-        association: Photo.associations.owner,
+        as: 'Owner',
+        association: Photo.associations.Owner,
         include: [{
           model: Photo,
-          as: 'currentProfilePhoto',
-          association: User.associations.currentProfilePhoto
+          as: 'CurrentProfilePhoto',
+          association: User.associations.CurrentProfilePhoto
         }]
+      }, {
+        model: LocationTag,
+        association: Photo.associations.LocationTag
       }],
       limit: req.query.size,
       offset: req.query.size * (req.query.page - 1)
     })
 
     photos = photos.map(photo => {
-      let response = resScheme.photo(photo)
+      let response = resScheme.photo(photo, req.user, userPoint)
       return response
     })
 
@@ -53,15 +52,22 @@ router.get('/aroundme/photos', async (req, res, next) => {
 
 router.post('/photo', async (req, res, next) => {
   let [lat, long] = req.body.latlong.split(',').map(Number)
+  let { image_name, location_name } = req.body
   let extension = req.file.mimetype.split('/')[1]
 
   await sequelize.transaction(async function (t) {
     try {
       let photo = await req.user.createPhoto({
         type: 'photo',
-        lat,
-        long,
+        name: image_name,
+        LocationTag: {
+          name: location_name,
+          lat,
+          long
+        },
         extension
+      }, {
+        include: [{ association: Photo.associations.LocationTag }]
       })
 
       await photo.upload(req.file)
