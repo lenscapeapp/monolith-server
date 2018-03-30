@@ -10,8 +10,12 @@ chai.should()
 chai.use(chaiHttp)
 
 describe('Health check', () => {
-  before(() => {
-    sequelize.sync()
+  before((done) => {
+    sequelize.sync().then(() => done())
+  })
+
+  after((done) => {
+    sequelize.drop().then(() => done())
   })
 
   it('should return 200', (done) => {
@@ -36,7 +40,6 @@ describe('Health check', () => {
       })
       .end((err, res) => {
         if (err) throw err
-        console.log(res)
         res.should.have.status(200)
         done()
       })
