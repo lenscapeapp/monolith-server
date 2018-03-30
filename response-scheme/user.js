@@ -5,5 +5,5 @@ module.exports = (user) => ({
   firstname: user.firstname,
   lastname: user.lastname,
   email: user.email,
-  picture: user.currentProfilePicture ? user.currentProfilePicture.getUrls().thumbnail : PLACEHOLDER_PROFILE_URL
+  picture: user.CurrentProfilePicture ? user.CurrentProfilePicture.getUrls().thumbnail : PLACEHOLDER_PROFILE_URL
 })
