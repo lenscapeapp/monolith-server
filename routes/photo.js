@@ -19,6 +19,9 @@ router.get('/aroundme/photos', async (req, res, next) => {
         '$LocationTag.lat$': { [Op.between]: [swBound.latitude(), neBound.latitude()] },
         '$LocationTag.long$': { [Op.between]: [swBound.longitude(), neBound.longitude()] }
       },
+      order: [
+        ['createdAt', 'DESC']
+      ],
       include: [{
         model: User,
         as: 'Owner',
