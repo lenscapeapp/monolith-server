@@ -23,7 +23,7 @@ router.use('*', (req, res, next) => {
   }
 
   res.status(400).json({
-    message: '',
+    message: errors[0].message,
     invalid_fields: errors
   })
 })
