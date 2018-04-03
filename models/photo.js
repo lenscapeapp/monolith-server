@@ -78,7 +78,6 @@ module.exports = (sequelize, DataTypes) => {
       } else if (this.type === 'photo') {
         resized = await Resize.keepRatio(file, width)
       }
-      console.log(this)
       let url = await Bucket.storePhoto(resized.buffer, `uploads/${File.encodePhoto(this, size.substring(0, 2))}`, contentType)
 
       return url

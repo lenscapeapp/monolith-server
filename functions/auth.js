@@ -19,8 +19,7 @@ async function authorize (req, res) {
   let { user } = req.states
 
   let payload = {
-    id: user.id,
-    exp: now() + A_DAY
+    id: user.id
   }
   let token = jwt.sign(payload, jwtOptions.secretOrKey)
 
