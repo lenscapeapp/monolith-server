@@ -11,6 +11,8 @@ const userRouter = require('./user')
 
 const router = new Router()
 
+
+// Health Check path
 router.get('/', (req, res) => {
   res.json({ message: 'Health check' })
 })
@@ -34,7 +36,7 @@ router.use('/', (req, res, next) => {
   let { page, size } = req.query
   let indexOffset = (page - 1) * size
 
-  if (pageTotalCount) {
+  if (pageTotalCount >= 0) {
     res.json({
       pagination: {
         page_information: {
@@ -47,6 +49,20 @@ router.use('/', (req, res, next) => {
         total_number_of_entities: pageTotalCount
       },
       data: pageData
+    })
+  } else if (pageTotalCount === 0) {
+    res.json({
+      pagination: {
+        page_information: {
+          number: page,
+          size: size
+        },
+        first: 0,
+        last: 0,
+        total_number_of_page: 1,
+        total_number_of_entities: 0
+      },
+      data: []
     })
   }
 })

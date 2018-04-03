@@ -11,14 +11,19 @@ router.get('/aroundme/photos', async (req, res, next) => {
   let [lat, long] = req.query.latlong.split(',').map(Number)
   let userPoint = new GeoPoint(lat, long)
   let [swBound, neBound] = userPoint.boundingCoordinates(5, 0, true)
+  let month = req.query.month
 
+  let monthQuery = sequelize.where(sequelize.fn('date_part', 'month', sequelize.col('Photo.createdAt')), month)
   try {
     let {count: total, rows: photos} = await Photo.findAndCount({
-      where: {
-        type: 'photo',
-        '$LocationTag.lat$': { [Op.between]: [swBound.latitude(), neBound.latitude()] },
-        '$LocationTag.long$': { [Op.between]: [swBound.longitude(), neBound.longitude()] }
-      },
+      where: sequelize.and(
+        {
+          type: 'photo',
+          '$LocationTag.lat$': { [Op.between]: [swBound.latitude(), neBound.latitude()] },
+          '$LocationTag.long$': { [Op.between]: [swBound.longitude(), neBound.longitude()] }
+        },
+        month > 0 ? monthQuery : {}
+      ),
       order: [
         ['createdAt', 'DESC']
       ],

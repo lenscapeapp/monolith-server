@@ -15,6 +15,19 @@ const jwtOptions = {
 
 function now () { return Math.floor(Date.now() / 1000) }
 
+function authenticate (req, res, next) {
+  passport.authenticate('jwt', { session: false }, function (err, user, info) {
+    if (err || !user) {
+      return res.status(401).json({ message: 'Unauthorized' })
+    }
+
+    req.logIn(user, { session: false }, err => {
+      if (err) return next(err)
+      return next()
+    })
+  })(req, res, next)
+}
+
 async function authorize (req, res) {
   let { user } = req.states
 
@@ -50,11 +63,11 @@ passport.use(new JwtStrategy(jwtOptions, async (payload, done) => {
     let user = await User.findOne({ where: { id: payload.id } })
     done(null, user)
   } catch (error) {
-    done(error)
+    done(error, false, { message: 'Unauthorized' })
   }
 }))
 
 module.exports = {
   authorize,
-  authenticate: passport.authenticate('jwt', { session: false })
+  authenticate
 }

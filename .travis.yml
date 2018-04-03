@@ -1,0 +1,25 @@
+language: node_js
+node_js:
+- 8.9.4
+services:
+- postgresql
+- docker
+before_script:
+- psql -c 'create database lenscape_test;' -U postgres
+before_install:
+- openssl aes-256-cbc -K $encrypted_023c6aaf1c7e_key -iv $encrypted_023c6aaf1c7e_iv
+  -in gcloud_credentials.tar.gz.enc -out gcloud_credentials.tar.gz -d
+- tar -xzf gcloud_credentials.tar.gz
+- gcloud auth activate-service-account --key-file gcloud-client-secret.json
+- docker run -d -p 127.0.0.1:9000:9000 h2non/imaginary
+cache:
+  directories:
+  - node_modules
+deploy:
+  provider: gcs
+  access_key_id: GOOGX2FRDFCQ2XQ5
+  secret_access_key:
+    secure: BdBwzW08vbpdZnFDV3vr8gDyo3SUtfkR9CfgcpZZNNweLjo7SVJEVHE5QwLsi1fc93W3ailFIBMINAQoxduogDDJlWpclXvhX87WNA/lm//tn+1fLd5E8Kufhfp2BJoGc/Eq7qGduw4ySGQCEnLrYC6H3BcrtA7MKFCRMuszBg9PHyOdT7rmH4z8qw37pzCRKRlZtp7l9z1bE7pYonIMi6CTKOs413+XrXEXZek3ddY+4+hVJd68JLf6hNbGBqSZOYL7iSHdgdxd/7UYotY9dH2uEwkMxNhXcQyUQZCo9WiJ+H3nZyZJwIVAt1b8S5hFm6c9xOOTjahZPLwMT/qSjzZLY3tJqIhpaWGHQ1AhORAOPuNGnM30ll+/ivw5i288jTaQBY7vP/VIFnSmgLHm7BwTF59GN+my14OvTtOhAQakkHAqsMZMSCJFP8Y9GE2Bp6ZbBIzxnmnkogXx5CSavq2HkFv+fk0sfLhgIFpQzataDSzKY01MvLqk0Sxtly76ONH7M6h1ismbwwxsBnEtB62K7C2/bytQdOvZPESQt95cagRhhEl8gskWQ8T9rBLkZGPC0p+9qbwLufcPlmu9glJjtmPaHZmzuDuZzqnBvyEvnZ4mZBvfmUm9z0NQO8cQdt32r6HyJFTErhBMCP06AWEW4XUS8Wjk2Wf64tgebLU=
+  bucket: lenscape_test
+  on:
+    repo: lenscapeapp/monolith-server
