@@ -1,5 +1,8 @@
+const IS_PRODUCTION = process.env.NODE_ENV === 'production'
+const IS_TEST = process.env.NODE_ENV === 'test'
+
 const BUCKET_BASEURL = 'https://bucket.lenscape.me'
-const BUCKET_NAME = 'lenscape'
+const BUCKET_NAME = IS_PRODUCTION ? 'lenscape' : (IS_TEST ? 'lenscape_test' : 'lenscape_dev')
 
 const DEFAULT_SECRET = 'secret'
 const CONTENT_TYPE_EXTENSION_MAP = {
@@ -7,7 +10,6 @@ const CONTENT_TYPE_EXTENSION_MAP = {
   'image/jpg': 'jpg',
   'image/png': 'png'
 }
-const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 
 module.exports = {
   ALLOWED_CONTENT_TYPE: Object.keys(CONTENT_TYPE_EXTENSION_MAP),
@@ -17,11 +19,12 @@ module.exports = {
   DEFAULT_SECRET,
   GCLOUD_PROJECT_ID: 'lenscapeapp',
   IMAGINARY_BASEURL: IS_PRODUCTION ? 'http://imaginary:9000' : 'http://localhost:9000',
+  IS_PRODUCTION,
+  IS_TEST,
   PHOTO_SIZE: {
     'thumbnail': 400,
     'resized': 2000
   },
-  IS_PRODUCTION,
   PLACEHOLDER_PROFILE_URL: `${BUCKET_BASEURL}/placeholder/profile.jpg`,
   SECRET: process.env.APP_SECRET || DEFAULT_SECRET
 }
