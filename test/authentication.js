@@ -58,19 +58,23 @@ describe('Authentication', () => {
         .field('password', faker.internet.password())
         .end((err, res) => {
           if (err) throw err
-          should.exist(res.body.user)
-          expect(res.body.user).to.include(info)
+          try {
+            should.exist(res.body.user)
+            expect(res.body.user).to.include(info)
 
-          let photoUrl = new URL(res.body.user.picture)
-          chai.request(photoUrl.origin)
-            .get(photoUrl.pathname)
-            .end((err, res) => {
-              if (err) throw err
-              res.should.have.status(200)
-              done()
-            })
+            let photoUrl = new URL(res.body.user.picture)
+            chai.request(photoUrl.origin)
+              .get(photoUrl.pathname)
+              .end((err, res) => {
+                if (err) throw err
+                res.should.have.status(200)
+                done()
+              })
+          } catch (err) {
+            console.log(err)
+          }
         })
-    }).timeout(10e3)
+    }).timeout(30e3)
   })
 
   it('Local Login')

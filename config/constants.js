@@ -19,11 +19,12 @@ module.exports = {
   DEFAULT_SECRET,
   GCLOUD_PROJECT_ID: 'lenscapeapp',
   IMAGINARY_BASEURL: IS_PRODUCTION ? 'http://imaginary:9000' : 'http://localhost:9000',
+  IS_PRODUCTION,
+  IS_TEST,
   PHOTO_SIZE: {
     'thumbnail': 400,
     'resized': 2000
   },
-  IS_PRODUCTION,
   PLACEHOLDER_PROFILE_URL: `${BUCKET_BASEURL}/placeholder/profile.jpg`,
   SECRET: process.env.APP_SECRET || DEFAULT_SECRET
 }

@@ -7,6 +7,10 @@ services:
 before_script:
 - psql -c 'create database lenscape_test;' -U postgres
 before_install:
+- openssl aes-256-cbc -K $encrypted_023c6aaf1c7e_key -iv $encrypted_023c6aaf1c7e_iv
+  -in gcloud_credentials.tar.gz.enc -out gcloud_credentials.tar.gz -d
+- tar -xzf gcloud_credentials.tar.gz
+- gcloud auth activate-service-account --key-file gcloud-client-secret.json
 - docker run -d -p 127.0.0.1:9000:9000 h2non/imaginary
 cache:
   directories:
