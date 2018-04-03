@@ -11,6 +11,8 @@ const userRouter = require('./user')
 
 const router = new Router()
 
+
+// Health Check path
 router.get('/', (req, res) => {
   res.json({ message: 'Health check' })
 })
