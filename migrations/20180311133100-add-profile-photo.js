@@ -9,6 +9,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.removeColumn('Users', 'current_profile_id')
+    return queryInterface.removeColumn('Photos', 'current_profile_id')
   }
 }

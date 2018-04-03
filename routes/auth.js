@@ -103,7 +103,8 @@ router.post('/login/facebook', async (req, res, next) => {
       let photo = await user.createCurrentProfilePhoto({
         type: 'profile',
         extension: 'jpg',
-        name: ''
+        name: '',
+        owner_id: user.id
       })
       await photo.upload({ buffer: pictureBuffer }, 'image/jpg')
     }
