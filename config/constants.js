@@ -1,7 +1,7 @@
 const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 const IS_TEST = process.env.NODE_ENV === 'test'
 
-const BUCKET_BASEURL = 'https://bucket.lenscape.me'
+const BUCKET_BASEURL = IS_PRODUCTION ? 'https://bucket.lenscape.me' : ('https://storage.googleapis.com/' + (IS_TEST ? 'lenscape_test' : 'lenscape_dev'))
 const BUCKET_NAME = IS_PRODUCTION ? 'lenscape' : (IS_TEST ? 'lenscape_test' : 'lenscape_dev')
 
 const DEFAULT_SECRET = 'secret'
