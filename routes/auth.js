@@ -1,8 +1,8 @@
 const bcrypt = require('bcrypt')
 const { Router } = require('express')
 
-const { Facebook, Auth, Resize, Bucket, File } = require('../functions')
-const { FacebookAuth, LocalAuth, User, sequelize, Sequelize } = require('../models')
+const { Facebook, Auth } = require('../functions')
+const { FacebookAuth, LocalAuth, User, sequelize } = require('../models')
 
 const router = new Router()
 
@@ -21,15 +21,15 @@ router.post('/register',
           include: [{ association: LocalAuth.associations.User }]
         })
 
-        req.states.user = localauth.User
+        req.user = localauth.User
 
         if (req.file !== undefined) {
           let extension = req.file.mimetype.split('/')[1]
-          let photo = await req.states.user.createCurrentProfilePhoto({
+          let photo = await req.user.createCurrentProfilePhoto({
             type: 'profile',
             extension,
             name: '',
-            owner_id: req.states.user.id
+            owner_id: req.user.id
           }, { transaction: t })
           let pictureUrls = await photo.upload(req.file, req.file.mimetype)
           req.userPicture = pictureUrls.thumbnail
@@ -50,7 +50,7 @@ router.post('/login/local', async (req, res, next) => {
   const { email, password } = req.body
 
   try {
-    req.states.user = await User.findOne({
+    req.user = await User.findOne({
       where: { email },
       include: [{ model: LocalAuth }]
     })
@@ -59,11 +59,11 @@ router.post('/login/local', async (req, res, next) => {
     return next(error)
   }
 
-  if (req.states.user === null || req.states.user.LocalAuth === null) {
+  if (req.user === null || req.user.LocalAuth === null) {
     return res.status(401).json({ message: 'Email or Password is incorrect' })
   }
 
-  let authenticated = await bcrypt.compare(password, req.states.user.LocalAuth.hpassword)
+  let authenticated = await bcrypt.compare(password, req.user.LocalAuth.hpassword)
   if (!authenticated) {
     return res.status(401).json({ message: 'Email or Password is incorrect' })
   }
@@ -109,7 +109,7 @@ router.post('/login/facebook', async (req, res, next) => {
       await photo.upload({ buffer: pictureBuffer }, 'image/jpg')
     }
 
-    req.states.user = user
+    req.user = user
     next()
   } catch (error) {
     res.statusCode = 500

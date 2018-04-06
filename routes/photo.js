@@ -18,9 +18,7 @@ router.get('/aroundme/photos', async (req, res, next) => {
     let {count: total, rows: photos} = await Photo.findAndCount({
       where: sequelize.and(
         {
-          type: 'photo',
-          '$LocationTag.lat$': { [Op.between]: [swBound.latitude(), neBound.latitude()] },
-          '$LocationTag.long$': { [Op.between]: [swBound.longitude(), neBound.longitude()] }
+          type: 'photo'
         },
         month > 0 ? monthQuery : {}
       ),
@@ -38,14 +36,18 @@ router.get('/aroundme/photos', async (req, res, next) => {
         }]
       }, {
         model: LocationTag,
-        association: Photo.associations.LocationTag
+        association: Photo.associations.LocationTag,
+        where: {
+          lat: { [Op.between]: [swBound.latitude(), neBound.latitude()] },
+          long: { [Op.between]: [swBound.longitude(), neBound.longitude()] }
+        }
       }],
       limit: req.query.size,
       offset: req.query.size * (req.query.page - 1)
     })
 
     photos = photos.map(photo => {
-      let response = resScheme.photo(photo, req.user, userPoint)
+      let response = resScheme(photo, req)
       return response
     })
 

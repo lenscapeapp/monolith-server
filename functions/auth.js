@@ -3,17 +3,13 @@ const jwt = require('jsonwebtoken')
 const { ExtractJwt, Strategy: JwtStrategy } = require('passport-jwt')
 
 const { User } = require('../models')
-const filename = require('../functions/file')
-const bucket = require('../functions/bucket')
-const { PLACEHOLDER_PROFILE_URL, SECRET } = require('../config/constants')
+const { SECRET } = require('../config/constants')
+const resScheme = require('../response-scheme')
 
-const A_DAY = 60 * 60 * 24
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: SECRET
 }
-
-function now () { return Math.floor(Date.now() / 1000) }
 
 function authenticate (req, res, next) {
   passport.authenticate('jwt', { session: false }, function (err, user, info) {
@@ -29,30 +25,15 @@ function authenticate (req, res, next) {
 }
 
 async function authorize (req, res) {
-  let { user } = req.states
+  let user = req.user
 
   let payload = {
     id: user.id
   }
   let token = jwt.sign(payload, jwtOptions.secretOrKey)
 
-  let picture = await user.getCurrentProfilePhoto()
-
-  let pictureUrl = PLACEHOLDER_PROFILE_URL
-
-  if (picture !== null) {
-    let name = filename.encodePhoto(picture, 'th')
-    pictureUrl = bucket.getBucketURL(`uploads/${name}`)
-  }
-
   return res.json({
-    user: {
-      id: user.id,
-      firstname: user.firstname,
-      lastname: user.lastname,
-      email: user.email,
-      picture: pictureUrl
-    },
+    user: resScheme(user),
     message: 'Authenticated',
     token
   })
