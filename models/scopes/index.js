@@ -18,4 +18,9 @@ module.exports = models => {
       association: Photo.associations.LocationTag
     }]
   }, { override: true })
+  Photo.addScope('withOwner', {
+    include: [{
+      association: Photo.associations.Owner
+    }]
+  })
 }

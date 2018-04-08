@@ -61,9 +61,9 @@ router.post('/login/facebook', async (req, res, next) => {
     res.statusCode = 500
     return next(error)
   }
-}, Auth.authorize)
+}, Authentication.authorize)
 
-router.get('/secret', Auth.authenticate, (req, res) => {
+router.get('/secret', Authentication.authenticate, (req, res) => {
   res.json('This is secret that need authentication.')
 })
 

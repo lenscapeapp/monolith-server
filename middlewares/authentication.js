@@ -8,7 +8,7 @@ const { SECRET } = require('../config/constants')
 const { LocalAuth, User, sequelize } = require('../models')
 
 const jwtOptions = {
-  jwtFromRequest: ExtractJwt,
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: SECRET
 }
 
@@ -87,7 +87,6 @@ module.exports = {
   },
 
   async authorize (req, res, next) {
-    console.log(req.user)
     let user = await User.findOne({ where: { id: req.user.id } })
 
     let payload = { id: user.id }

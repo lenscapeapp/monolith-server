@@ -9,6 +9,7 @@ const validateRouter = require('./validator')
 // Logic router
 const authRouter = require('./auth')
 const userRouter = require('./user')
+const photoRouter = require('./photo')
 
 const router = new Router()
 
@@ -37,13 +38,10 @@ router.use('*', (req, res, next) => {
 })
 
 router.use('/', authRouter)
-
-// router require authencitation
-router.use('/', Auth.authenticate)
 router.use('/', userRouter)
-router.use('/', require('./photo'))
+router.use('/', photoRouter)
 
-router.use('/', (req, res, next) => {
+router.use('*', (req, res, next) => {
   let { pageData, pageTotalCount } = req.states
   let { page, size } = req.query
   let indexOffset = (page - 1) * size
