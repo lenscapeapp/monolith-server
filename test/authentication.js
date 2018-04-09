@@ -27,27 +27,18 @@ describe('Authentication', () => {
           ...info
         })
         .then(res => {
-          expect(res.body.user).to.exist()
-          expect(res.body.user).to.include(info)
-          
-          let photoUrl = new URL(res.body.user.picture)
-        })
-        .catch(err => done(err))
-        .end((err, res) => {
-          if (err) throw err
-
           should.exist(res.body.user)
           expect(res.body.user).to.include(info)
 
           let photoUrl = new URL(res.body.user.picture)
-          chai.request(photoUrl.origin)
+          return chai.request(photoUrl.origin)
             .get(photoUrl.pathname)
-            .end((err, res) => {
-              if (err) throw err
-              res.should.have.status(200)
-              done()
-            })
         })
+        .then(res => {
+          res.should.have.status(200)
+          done()
+        })
+        .catch(err => done(err))
     })
 
     it('should be able to register with profile picture', done => {
@@ -64,21 +55,19 @@ describe('Authentication', () => {
         .field('lastname', info.lastname)
         .field('email', info.email)
         .field('password', faker.internet.password())
-        .end((err, res) => {
-          if (err) throw err
-
+        .then(res => {
           should.exist(res.body.user)
           expect(res.body.user).to.include(info)
 
           let photoUrl = new URL(res.body.user.picture)
-          chai.request(photoUrl.origin)
+          return chai.request(photoUrl.origin)
             .get(photoUrl.pathname)
-            .end((err, res) => {
-              if (err) throw err
-              res.should.have.status(200)
-              done()
-            })
         })
+        .then(res => {
+          res.should.have.status(200)
+          done()
+        })
+        .catch(err => done(err))
     }).timeout(30e3)
   })
 
@@ -111,9 +100,7 @@ describe('Authentication', () => {
             res.should.have.status(200)
             done()
           })
-          .catch(err => {
-            throw err
-          })
+          .catch(err => done(err))
       }).timeout(30e3)
 
       it('should have placeholder photo', done => {
