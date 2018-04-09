@@ -26,8 +26,16 @@ describe('Authentication', () => {
           password: faker.internet.password(),
           ...info
         })
+        .then(res => {
+          expect(res.body.user).to.exist()
+          expect(res.body.user).to.include(info)
+          
+          let photoUrl = new URL(res.body.user.picture)
+        })
+        .catch(err => done(err))
         .end((err, res) => {
           if (err) throw err
+
           should.exist(res.body.user)
           expect(res.body.user).to.include(info)
 
@@ -58,25 +66,88 @@ describe('Authentication', () => {
         .field('password', faker.internet.password())
         .end((err, res) => {
           if (err) throw err
-          try {
-            should.exist(res.body.user)
-            expect(res.body.user).to.include(info)
 
-            let photoUrl = new URL(res.body.user.picture)
-            chai.request(photoUrl.origin)
-              .get(photoUrl.pathname)
-              .end((err, res) => {
-                if (err) throw err
-                res.should.have.status(200)
-                done()
-              })
-          } catch (err) {
-            console.log(err)
-          }
+          should.exist(res.body.user)
+          expect(res.body.user).to.include(info)
+
+          let photoUrl = new URL(res.body.user.picture)
+          chai.request(photoUrl.origin)
+            .get(photoUrl.pathname)
+            .end((err, res) => {
+              if (err) throw err
+              res.should.have.status(200)
+              done()
+            })
         })
     }).timeout(30e3)
   })
 
-  it('Local Login')
+  describe('Login with Local method', () => {
+    describe('With correct information', () => {
+      it('should have profile photo', done => {
+        let info = {
+          firstname: faker.name.firstName(),
+          lastname: faker.name.lastName(),
+          email: faker.internet.email()
+        }
+        let password = faker.internet.password()
+        chai.request(server)
+          .post('/register')
+          .attach('picture', fs.readFileSync(path.join(__dirname, 'materials', 'profile.jpg')), 'profile.jpg')
+          .field('firstname', info.firstname)
+          .field('lastname', info.lastname)
+          .field('email', info.email)
+          .field('password', password)
+          .then(res => {
+            res.should.have.status(200)
+            return chai.request(server)
+              .post('/login/local')
+              .send({
+                email: info.email,
+                password
+              })
+          })
+          .then(res => {
+            res.should.have.status(200)
+            done()
+          })
+          .catch(err => {
+            throw err
+          })
+      }).timeout(30e3)
+
+      it('should have placeholder photo', done => {
+        let info = {
+          firstname: faker.name.firstName(),
+          lastname: faker.name.lastName(),
+          email: faker.internet.email()
+        }
+        let password = faker.internet.password()
+        chai.request(server)
+          .post('/register')
+          .send({
+            password,
+            ...info
+          })
+          .then(res => {
+            res.should.have.status(200)
+            return chai.request(server)
+              .post('/login/local')
+              .send({
+                email: info.email,
+                password
+              })
+          })
+          .then(res => {
+            res.should.have.status(200)
+            done()
+          })
+          .catch(err => {
+            throw err
+          })
+      })
+    })
+  })
+
   it('Facebook Login')
 })

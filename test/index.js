@@ -18,10 +18,10 @@ describe('Health check', () => {
   it('should return 200', (done) => {
     chai.request(server)
       .get('/')
-      .end((err, res) => {
-        if (err) throw err
+      .then(res => {
         res.should.have.status(200)
         done()
       })
+      .catch(err => done(err))
   })
 })
