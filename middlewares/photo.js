@@ -46,7 +46,7 @@ module.exports = {
     let extension = req.file.mimetype.split('/')[1]
 
     try {
-      await sequelize.transaction(async t => {
+      let photo = await sequelize.transaction(async t => {
         let photo = await req.user.createPhoto({
           type: 'photo',
           name: image_name,
@@ -57,13 +57,16 @@ module.exports = {
             long: req.location.longitude()
           }
         }, {
-          transaction: t
+          transaction: t,
+          include: [{ association: Photo.associations.LocationTag }]
         })
 
         await photo.upload(req.file)
+        return photo
       })
 
-      res.json({ message: 'Success' })
+      photo = await Photo.findById(photo.id)
+      res.json(response(photo, req))
     } catch (error) {
       res.statusCode = 500
       next(error)
