@@ -16,11 +16,13 @@ module.exports = {
   BUCKET_BASEURL,
   BUCKET_NAME,
   CONTENT_TYPE_EXTENSION_MAP,
+  DEBUG: process.env.DEBUG_MODE === 'true',
   DEFAULT_SECRET,
   GCLOUD_PROJECT_ID: 'lenscapeapp',
   IMAGINARY_BASEURL: IS_PRODUCTION ? 'http://imaginary:9000' : 'http://localhost:9000',
   IS_PRODUCTION,
   IS_TEST,
+  LOG_LEVEL: process.env.LOG_LEVEL || 'silly',
   PHOTO_SIZE: {
     'thumbnail': 400,
     'resized': 2000
