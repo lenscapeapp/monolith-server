@@ -1,3 +1,4 @@
+const GeoPoint = require('geopoint')
 const { Router } = require('express')
 
 const { Auth } = require('../functions')
@@ -8,9 +9,9 @@ const validateRouter = require('./validator')
 // Logic router
 const authRouter = require('./auth')
 const userRouter = require('./user')
+const photoRouter = require('./photo')
 
 const router = new Router()
-
 
 // Health Check path
 router.get('/', (req, res) => {
@@ -24,14 +25,23 @@ router.use('*', (req, res, next) => {
 
 router.use('/', validateRouter)
 
+// predefined-states
+router.use('*', (req, res, next) => {
+  let latlongString = req.body.latlong || req.query.latlong
+
+  if (latlongString) {
+    let [lat, long] = latlongString.split(',').map(each => Number(each))
+    req.location = new GeoPoint(lat, long)
+  }
+
+  next()
+})
+
 router.use('/', authRouter)
-
-// router require authencitation
-router.use('/', Auth.authenticate)
 router.use('/', userRouter)
-router.use('/', require('./photo'))
+router.use('/', photoRouter)
 
-router.use('/', (req, res, next) => {
+router.use('*', (req, res, next) => {
   let { pageData, pageTotalCount } = req.states
   let { page, size } = req.query
   let indexOffset = (page - 1) * size

@@ -8,8 +8,6 @@ var env = process.env.NODE_ENV || 'development'
 var config = require(path.join(__dirname, '/../config/config.js'))[env]
 var db = {}
 
-console.log(config)
-
 var sequelize = null
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config)
@@ -32,6 +30,8 @@ Object.keys(db).forEach(modelName => {
     db[modelName].associate(db)
   }
 })
+
+require('./scopes')(db)
 
 db.sequelize = sequelize
 db.Sequelize = Sequelize

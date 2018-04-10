@@ -31,7 +31,7 @@ app.use((err, req, res, next) => {
     } else {
       res.status(res.statusCode).json(err)
     }
-  } else {
+  } else if (res.headersSent) {
     res.sendStatus(res.statusCode).json({
       message: res.message
     })
