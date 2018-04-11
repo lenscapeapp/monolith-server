@@ -13,6 +13,7 @@
     "@google-cloud/storage": "^1.6.0",
     "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
+    "circular-json": "^0.5.1",
     "express": "^4.16.2",
     "express-validator": "^5.0.3",
     "fb": "^2.0.0",
