@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "test": "NODE_ENV=test mocha --exit"
+    "test": "LOG_LEVEL=error NODE_ENV=test mocha --exit"
   },
   "author": "chinnonae",
   "license": "UNLICENSED",
@@ -13,6 +13,7 @@
     "@google-cloud/storage": "^1.6.0",
     "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
+    "circular-json": "^0.5.1",
     "express": "^4.16.2",
     "express-validator": "^5.0.3",
     "fb": "^2.0.0",
@@ -30,7 +31,8 @@
     "pg-hstore": "^2.3.2",
     "request-promise-native": "^1.0.5",
     "sequelize": "^4.33.4",
-    "sequelize-cli": "^4.0.0"
+    "sequelize-cli": "^4.0.0",
+    "winston": "^3.0.0-rc4"
   },
   "devDependencies": {
     "chai": "^4.1.2",
