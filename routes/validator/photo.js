@@ -1,7 +1,8 @@
 const multer = require('multer')
-const { body, query } = require('express-validator/check')
+const { body, query, oneOf } = require('express-validator/check')
 const { Router } = require('express')
 
+const gmap = require('../../functions/gmap')
 const { File } = require('../../functions')
 
 const DEFAULT_PAGE_SIZE = 25
@@ -41,13 +42,32 @@ router.get('/aroundme/photos',
 )
 
 router.post('/photo', upload.single('picture'),
+  oneOf([
+    [
+      body('latlong')
+        .exists().withMessage('latlong is missing'),
+      body('location_name')
+        .exists().withMessage('location_name is missing')
+    ],
+    body('gplace_id')
+      .exists().withMessage('gplace_id is missing')
+  ], 'either latlong and location_name or gplace_id is required'),
   body('latlong')
-    .exists().withMessage('latlong is missing')
+    .optional()
     .isLatLong().withMessage('latlong value is invalid'),
   body('image_name')
     .exists().withMessage('image_name is missing'),
-  body('location_name')
-    .exists().withMessage('location_name is missing'),
+  body('gplace_id')
+    .optional()
+    .custom(value => {
+      return gmap.place({ placeid: value }).asPromise()
+        .then(res => {
+          return res && res.json && res.json.result
+        })
+        .catch(e => {
+          throw new Error('invalid gplace_id')
+        })
+    }),
   (req, res, next) => {
     if (req.file) return next()
     if (!req.body.picture) {

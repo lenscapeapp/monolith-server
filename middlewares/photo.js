@@ -1,11 +1,8 @@
-const GeoPoint = require('geopoint')
-const { Router } = require('express')
-
+const gmap = require('../functions/gmap')
 const response = require('../response-scheme')
 const { Photo, sequelize } = require('../models')
 
 const Op = sequelize.Op
-
 const RADIUS = 5 // km
 
 module.exports = {
@@ -45,6 +42,19 @@ module.exports = {
     let { image_name, location_name } = req.body
     let extension = req.file.mimetype.split('/')[1]
 
+    let gplace
+    let latitude
+    let longitude
+    if (req.body.gplace_id) {
+      gplace = (await (gmap.place({ placeid: req.body.gplace_id }).asPromise())).json.result
+      latitude = gplace.geometry.location.lat
+      longitude = gplace.geometry.location.lng
+      location_name = gplace.name
+    } else {
+      latitude = req.location.latitude()
+      longitude = req.location.longitude()
+    }
+
     try {
       let photo = await sequelize.transaction(async t => {
         let photo = await req.user.createPhoto({
@@ -53,8 +63,8 @@ module.exports = {
           extension,
           LocationTag: {
             name: location_name,
-            lat: req.location.latitude(),
-            long: req.location.longitude()
+            lat: latitude,
+            long: longitude
           }
         }, {
           transaction: t,
