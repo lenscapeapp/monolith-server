@@ -64,7 +64,6 @@ describe('Upload photo', () => {
         expect(res.body.location.name).to.equals(info.locationName)
         expect(res.body.location.latitude).to.equals(info.location.latitude())
         expect(res.body.location.longitude).to.equals(info.location.longitude())
-        expect(res.body.location.distance).to.be.a('number')
 
         // owner
         should.exist(res.body.owner)
@@ -110,4 +109,47 @@ describe('Upload photo', () => {
       })
       .catch(err => done(err))
   }).timeout(30e3)
+
+  it('should give photo around the given location', done => {
+    let info = {
+      center: new GeoPoint(13.846209, 100.568662),
+      imageName: faker.address.streetName(),
+      locationName: faker.address.streetAddress()
+    }
+    info.location = cfaker.address.latlong(info.center, 1)
+    let [lat, long] = info.location.split(',').map(Number)
+
+    chai.request(server)
+      .post('/photo')
+      .set('Authorization', `Bearer ${usertoken}`)
+      .attach('picture', fs.readFileSync(path.join(__dirname, 'materials', 'photo1.jpg')), 'photo.jpg')
+      .field('image_name', info.imageName)
+      .field('location_name', info.locationName)
+      .field('latlong', `${info.location}`)
+      .then(res => {
+        res.should.have.status(200)
+
+        return chai.request(server)
+          .get(`/aroundme/photos/?latlong=${info.center.latitude()}, ${info.center.longitude()}`)
+          .set('Authorization', `Bearer ${usertoken}`)
+          .then(res2 => {
+            let found = false
+            res2.body.data.forEach(photo => {
+              if (photo.id === res.body.id) {
+                found = true
+                let { location: expectLocation, owner: expectOwner, ...expectInfo } = res.body
+                let { location, owner, ...photoinfo } = photo
+                expect(location).to.include(expectLocation)
+                expect(owner).to.deep.equals(expectOwner)
+                expect(photoinfo).to.deep.equals(expectInfo)
+                return done()
+              }
+            })
+            if (!found) {
+              throw new Error('Uploaded photo is missing')
+            }
+          })
+      })
+      .catch(err => done(err))
+  }).timeout(60e3)
 })

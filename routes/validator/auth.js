@@ -57,7 +57,7 @@ module.exports = {
         let fb = new Facebook({ version: 'v2.12', accessToken: value })
         return fb.api('me').catch(err => {
           if ((err.response && err.response.error && err.response.error.message)) {
-            throw new Error(err.response.error.message)
+            throw new Error('invalid Facebook OAuth token')
           }
         })
       })

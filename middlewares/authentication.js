@@ -5,7 +5,7 @@ const request = require('request-promise-native')
 const { Facebook } = require('fb')
 const { ExtractJwt, Strategy: JwtStrategy } = require('passport-jwt')
 
-const response = require('../response-scheme')
+const ResponseScheme = require('../response-scheme')
 const { SECRET } = require('../config/constants')
 const { LocalAuth, User, sequelize } = require('../models')
 
@@ -106,7 +106,7 @@ module.exports = {
           include: [{ association: User.associations.FacebookAuth }],
           transaction: t
         })
-    
+
         if (user.FacebookAuth === null) {
           await user.createFacebookAuth({ facebook_id: profile.id }, { transaction: t })
         }
@@ -120,7 +120,7 @@ module.exports = {
           let buffer = await request.get(profile.picture.data.url, { encoding: null })
           await photo.upload({ buffer }, 'image/jpg')
         }
-  
+
         req.user = user
       })
     } catch (error) {
@@ -137,7 +137,7 @@ module.exports = {
     let token = jwt.sign(payload, jwtOptions.secretOrKey)
 
     return res.json({
-      user: response(user),
+      user: ResponseScheme(user, req),
       message: 'Authenticated',
       token
     })
