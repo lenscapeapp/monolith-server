@@ -15,7 +15,10 @@ module.exports = {
   activateGuard (req, res, next) {
     let errors = validationResult(req)
 
-    if (errors.isEmpty()) { return next() }
+    if (errors.isEmpty()) {
+      req.data = matchedData(req)
+      return next()
+    }
 
     let invalids = errors.mapped()
     errors = []

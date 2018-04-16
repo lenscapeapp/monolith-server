@@ -5,6 +5,7 @@ const { Router } = require('express')
 const authRouter = require('./auth')
 const userRouter = require('./user')
 const photoRouter = require('./photo')
+const locationRouter = require('./location')
 
 const router = new Router()
 
@@ -34,5 +35,6 @@ router.use('*', (req, res, next) => {
 router.use('/', authRouter)
 router.use('/', userRouter)
 router.use('/', photoRouter)
+router.use('/', locationRouter)
 
 module.exports = router
