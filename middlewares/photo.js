@@ -1,6 +1,6 @@
 const gmap = require('../functions/gmap')
 const response = require('../response-scheme')
-const { Photo, sequelize } = require('../models')
+const { LocationTag, Photo, sequelize } = require('../models')
 
 const Op = sequelize.Op
 const RADIUS = 5 // km
@@ -42,51 +42,54 @@ module.exports = {
     }
   },
 
-  async create (req, res, next) {
-    let { image_name, location_name, latlong } = req.body
-    let extension = req.file.mimetype.split('/')[1]
-    
-    let gplace
-    let latitude
-    let longitude
-    if (req.body.gplace_id) {
-      gplace = (await (gmap.place({ placeid: req.body.gplace_id }).asPromise())).json.result
-      latitude = gplace.geometry.location.lat
-      longitude = gplace.geometry.location.lng
-      location_name = gplace.name
-    } else {
-      let [lat, long] = latlong.split(',').map(Number)
-      latitude = lat
-      longitude = long
-    }
-    
+  async createPhoto (req, res, next) {
     try {
       let photo = await sequelize.transaction(async t => {
-        let photo = await req.user.createPhoto({
-          type: 'photo',
-          name: image_name,
-          extension,
-          LocationTag: {
-            name: location_name,
-            lat: latitude,
-            long: longitude
-          }
-        }, {
-          transaction: t,
-          include: [{ association: Photo.associations.LocationTag }]
-        })
+        let { image_name: imageName, gplace_id: gplaceId, place_id: placeId, place_type: placeType } = req.data
+        if (gplaceId) { placeId = gplaceId; placeType = 'google' }
 
+        let location
+        if (placeType === 'lenscape') {
+          location = await LocationTag.findOne({ where: { id: placeId } })
+        } else if (placeType === 'google') {
+          let gplace = (await (gmap.place({ placeid: placeId }).asPromise())).json.result
+
+          location = (await LocationTag.findOrCreate({
+            where: { google_place_id: placeId },
+            defaults: {
+              name: gplace.name,
+              lat: gplace.geometry.location.lat,
+              long: gplace.geometry.location.lng,
+              google_place_id: placeId
+            },
+            transaction: t
+          }))[0]
+        } else {
+          let { location_name: locationName, latlong } = req.data
+          let [lat, long] = latlong.split(',').map(Number)
+          location = await LocationTag.create({
+            name: locationName,
+            lat,
+            long
+          }, { transaction: t })
+        }
+        let photo = await req.user.createPhoto({
+          name: imageName,
+          extension: req.file.mimetype.split('/')[1],
+          type: 'photo'
+        }, { transaction: t })
+
+        await location.addPhoto(photo, { transaction: t })
         await photo.upload(req.file)
+
         return photo
       })
 
-      photo = await Photo.findById(photo.id)
-      res.states.data = photo
+      res.states.data = await Photo.findById(photo.id)
       next()
-    } catch (error) {
-      console.log(error)
+    } catch (err) {
       res.statusCode = 500
-      next(error)
+      next(err)
     }
   }
 }

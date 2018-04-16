@@ -12,6 +12,9 @@ module.exports = (sequelize, DataTypes) => {
     long: {
       type: DataTypes.DOUBLE,
       allowNull: false
+    },
+    google_place_id: {
+      type: DataTypes.STRING
     }
   }, {})
   LocationTag.associate = function (models) {

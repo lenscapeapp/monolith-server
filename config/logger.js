@@ -31,7 +31,6 @@ const logger = winston.createLogger({
     CircularJsonFormatter()
   ),
   transports: [new winston.transports.Console()]
-  // transports: [new winston.transports.File({ filename: 'test.log' })]
 })
 
 module.exports = logger

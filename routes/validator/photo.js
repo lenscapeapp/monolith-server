@@ -1,6 +1,7 @@
 const { body, query, oneOf } = require('express-validator/check')
 
 const gmap = require('../../functions/gmap')
+const { LocationTag } = require('../../models')
 
 const DEFAULT_PAGE_SIZE = 25
 const MAX_INT = Math.pow(2 ^ 31)
@@ -45,15 +46,19 @@ module.exports = {
           .exists().withMessage('location_name is missing')
       ],
       body('gplace_id')
-        .exists().withMessage('gplace_id is missing')
-    ], 'either latlong and location_name or gplace_id is required'),
-    body('latlong')
-      .optional()
+        .exists().withMessage('gplace_id is missing'),
+      [
+        body('place_id')
+          .exists().withMessage('place_id is missing'),
+        body('place_type')
+          .exists().withMessage('place_type is missing')
+      ]
+    ], 'either latlong and location_name or gplace_id or place_id and place_type is required'),
+    body('latlong').optional()
       .isLatLong().withMessage('latlong value is invalid'),
     body('image_name')
       .exists().withMessage('image_name is missing'),
-    body('gplace_id')
-      .optional()
+    body('gplace_id').optional()
       .custom(value => {
         return gmap.place({ placeid: value }).asPromise()
           .then(res => {
@@ -63,6 +68,34 @@ module.exports = {
             throw new Error('invalid gplace_id')
           })
       }),
+    body('place_type').optional()
+      .trim()
+      .customSanitizer(value => value.toLowerCase())
+      .isIn(['google', 'lenscape']),
+    body('place_id').optional()
+      .custom((value, { req }) => {
+        let type = req.body.place_type
+        if (type === 'google') {
+          return gmap.place({ placeid: value }).asPromise()
+            .then(res => {
+              return res && res.json && res.json.result
+            })
+            .catch(e => {
+              throw new Error('invalid google place id')
+            })
+        } else if (type === 'lenscape') {
+          let id = Number(value)
+          if (isNaN(id)) throw new Error('lenscape place id must be an integer')
+          return LocationTag.findOne({ where: { id } })
+            .then(location => {
+              if (location === null) {
+                throw new Error('invalid lenscape place id')
+              }
+              return location
+            })
+        }
+      }),
+
     (req, res, next) => {
       if (req.file) return next()
       if (!req.body.picture) {
