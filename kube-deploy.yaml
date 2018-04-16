@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
         - name: lenscape-monolith-server
-          image: gcr.io/lenscapeapp/github-lenscapeapp-monolith-server:4
+          image: gcr.io/lenscapeapp/github-lenscapeapp-monolith-server:8a99d008850f7b9323b0e694597fc7e5ec3b2298
           imagePullPolicy: Always 
           ports:
             - containerPort: 8080
@@ -32,6 +32,11 @@ spec:
                 secretKeyRef:
                   name: cloudsql-db-credentials
                   key: password
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: google-maps-api-key
+                  key: API_KEY
             # [END] cloudsql secrets
         # [START] cloudsql proxy
         - name: cloudsql-proxy

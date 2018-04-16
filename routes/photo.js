@@ -24,7 +24,7 @@ router.post('/photo',
   Guard.createPhoto,
   Request.activateGuard,
   Authentication.authenticate,
-  Photo.create,
+  Photo.createPhoto,
   Response.response
 )
 

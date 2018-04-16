@@ -9,7 +9,7 @@ module.exports = {
     database: 'lenscape_dev',
     host: 'localhost',
     dialect: 'postgres',
-    logging: logger.debug.bind(logger)
+    logging: (msg) => logger.debug(msg)
   },
   production: {
     username: process.env.POSTGRES_DB_USER,
@@ -17,7 +17,7 @@ module.exports = {
     host: process.env.POSTGRES_DB_HOST,
     database: 'lenscape_prod',
     dialect: 'postgres',
-    logging: logger.debug.bind(logger)
+    logging: (msg) => logger.debug(msg)
   },
   test: {
     username: 'postgres',
