@@ -12,7 +12,7 @@ module.exports = {
     let monthQuery = sequelize.where(sequelize.fn('date_part', 'month', sequelize.col('Photo.createdAt')), month)
 
     try {
-      let {count: total, rows: photos} = await Photo.scope('withOwner').findAndCount({
+      let {count, rows: photos} = await Photo.scope('withOwner').findAndCount({
         where: sequelize.and(
           { type: 'photo' },
           month > 0 ? monthQuery : {}
@@ -29,8 +29,12 @@ module.exports = {
         offset: req.query.size * (req.query.page - 1)
       })
 
-      req.states.pageTotalCount = total
-      req.states.pageData = photos.map(photo => response(photo, req))
+      res.states = {
+        count,
+        data: photos,
+        page: req.query.page,
+        size: req.query.size
+      }
       next()
     } catch (error) {
       res.statusCode = 500
@@ -39,9 +43,9 @@ module.exports = {
   },
 
   async create (req, res, next) {
-    let { image_name, location_name } = req.body
+    let { image_name, location_name, latlong } = req.body
     let extension = req.file.mimetype.split('/')[1]
-
+    
     let gplace
     let latitude
     let longitude
@@ -51,10 +55,11 @@ module.exports = {
       longitude = gplace.geometry.location.lng
       location_name = gplace.name
     } else {
-      latitude = req.location.latitude()
-      longitude = req.location.longitude()
+      let [lat, long] = latlong.split(',').map(Number)
+      latitude = lat
+      longitude = long
     }
-
+    
     try {
       let photo = await sequelize.transaction(async t => {
         let photo = await req.user.createPhoto({
@@ -76,8 +81,10 @@ module.exports = {
       })
 
       photo = await Photo.findById(photo.id)
-      res.json(response(photo, req))
+      res.states.data = photo
+      next()
     } catch (error) {
+      console.log(error)
       res.statusCode = 500
       next(error)
     }

@@ -129,9 +129,7 @@ describe('Authentication', () => {
             res.should.have.status(200)
             done()
           })
-          .catch(err => {
-            throw err
-          })
+          .catch(err => done(err))
       })
     })
   })
