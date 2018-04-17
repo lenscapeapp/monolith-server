@@ -17,7 +17,7 @@ module.exports = {
     let errors = validationResult(req)
 
     if (errors.isEmpty()) {
-      req.data = Object.assign(req.data, matchedData(req))
+      req.data = Object.assign(req.data || {}, matchedData(req))
       return next()
     }
 
