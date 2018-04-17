@@ -23,7 +23,7 @@ function getResponse (model, req) {
     result = Object.assign(result, {
       id: states.id,
       name: states.name,
-      number_of_likes: 0,
+      number_of_likes: states.number_of_likes,
       thumbnail_link: links.thumbnail,
       picture_link: links.resized,
       original_url: links.original

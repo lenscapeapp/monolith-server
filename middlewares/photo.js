@@ -102,5 +102,42 @@ module.exports = {
       res.statusCode = 500
       next(err)
     }
+  },
+
+  async listLikes (req, res, next) {
+    let { photo_id: photoId } = req.data
+
+    let photo = await Photo.findById(photoId)
+
+    let likedUsers = await photo.getLikedUsers()
+
+    res.states.data = likedUsers
+    next()
+  },
+
+  async liked (req, res, next) {
+    let { photo_id: photoId } = req.data
+
+    let photo = await Photo.findById(photoId)
+
+    let likes = await photo.addLikedUser(req.user)
+    photo.number_of_likes += likes[0] ? likes[0].length : 0
+    await photo.save()
+
+    res.states.data = photo
+    next()
+  },
+
+  async unliked (req, res, next) {
+    let { photo_id: photoId } = req.data
+
+    let photo = await Photo.findById(photoId)
+
+    let unlikes = await photo.removeLikedUser(req.user)
+    photo.number_of_likes -= unlikes
+    await photo.save()
+
+    res.states.data = photo
+    next()
   }
 }

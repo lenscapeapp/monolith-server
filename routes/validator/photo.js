@@ -1,7 +1,7 @@
-const { body, query, oneOf } = require('express-validator/check')
+const { body, param, query, oneOf } = require('express-validator/check')
 
 const gmap = require('../../functions/gmap')
-const { LocationTag } = require('../../models')
+const { LocationTag, Photo } = require('../../models')
 
 const DEFAULT_PAGE_SIZE = 25
 const MAX_INT = Math.pow(2, 31)
@@ -53,7 +53,7 @@ module.exports = {
         .exists().withMessage('gplace_id is missing'),
       body('place_id')
         .exists().withMessage('place_id is missing')
-        
+
     ], 'either latlong and location_name or gplace_id or place_id and place_type is required'),
     body('latlong').optional({ checkFalsy: false })
       .isLatLong().withMessage('latlong value is invalid'),
@@ -76,7 +76,7 @@ module.exports = {
       .isIn(['google', 'lenscape']),
     body('place_id').optional({ nullable: false, checkFalsy: false })
       .custom((value, { req }) => {
-        if (value == false) { return new Promise((resolve) => resolve(undefined)) }
+        if (!value) { return new Promise((resolve) => resolve(undefined)) }
         let type = req.body.place_type
         if (type === 'google') {
           return gmap.place({ placeid: value }).asPromise()
@@ -121,5 +121,43 @@ module.exports = {
       }
       next()
     }
+  ],
+
+  listLikes: [
+    param('photo_id')
+      .exists()
+      .isInt({ min: 1 })
+      .withMessage('photo_id must be an integer greater than 0')
+      .toInt()
+      .custom(value => {
+        return Photo.findById(value)
+          // .then(res => )
+          .catch(() => { throw new Error(`cannot find photo with id=${value}`) })
+      })
+  ],
+
+  liked: [
+    param('photo_id')
+      .exists()
+      .isInt({ min: 1 })
+      .withMessage('photo_id must be an integer greater than 0')
+      .toInt()
+      .custom(value => {
+        return Photo.findById(value)
+          // .then(res => )
+          .catch(() => { throw new Error(`cannot find photo with id=${value}`) })
+      })
+  ],
+
+  unliked: [
+    param('photo_id')
+      .exists()
+      .isInt({ min: 1 })
+      .withMessage('photo_id must be an integer greater than 0')
+      .toInt()
+      .custom(value => {
+        return Photo.findById(value)
+          .catch(() => { throw new Error(`cannot find photo with id=${value}`) })
+      })
   ]
 }
