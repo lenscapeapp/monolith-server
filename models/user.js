@@ -31,6 +31,14 @@ module.exports = (sequelize, DataTypes) => {
       as: 'CurrentProfilePhoto',
       foreignKey: 'current_profile_id'
     })
+    User.belongsToMany(models.Photo, {
+      through: {
+        model: models.Like,
+        unique: true
+      },
+      as: 'LikedPhotos',
+      foreignKey: 'user_id'
+    })
   }
 
   User.prototype.getProfile = async function () {
