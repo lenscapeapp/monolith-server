@@ -12,15 +12,19 @@ module.exports = {
       .exists().withMessage('latlong is required')
       .isLatLong().withMessage('latlong is not valid'),
     query('page')
-      .optional()
-      .isInt().withMessage('page must be an integer')
+      .optional({ checkFalsy: false })
+      .isInt()
+      .isLength({ min: 1 })
+      .withMessage('page must be an integer greater than 0')
       .toInt(),
     query('size')
-      .optional()
-      .isInt().withMessage('size must be an integer')
+      .optional({ checkFalsy: false })
+      .isInt()
+      .isLength({ min: 1 })
+      .withMessage('size must be an integer greater than 0')
       .toInt(),
     query('startId')
-      .optional()
+      .optional({ checkFalsy: false })
       .isInt().withMessage('start ID must be an integer')
       .toInt(),
     query('month')
@@ -47,19 +51,17 @@ module.exports = {
       ],
       body('gplace_id')
         .exists().withMessage('gplace_id is missing'),
-      [
-        body('place_id')
-          .exists().withMessage('place_id is missing'),
-        body('place_type')
-          .exists().withMessage('place_type is missing')
-      ]
+      body('place_id')
+        .exists().withMessage('place_id is missing')
+        
     ], 'either latlong and location_name or gplace_id or place_id and place_type is required'),
-    body('latlong').optional()
+    body('latlong').optional({ checkFalsy: false })
       .isLatLong().withMessage('latlong value is invalid'),
     body('image_name')
       .exists().withMessage('image_name is missing'),
     body('gplace_id').optional()
       .custom(value => {
+        if (!value) { return new Promise(resolve => resolve(undefined)) }
         return gmap.place({ placeid: value }).asPromise()
           .then(res => {
             return res && res.json && res.json.result
@@ -68,12 +70,13 @@ module.exports = {
             throw new Error('invalid gplace_id')
           })
       }),
-    body('place_type').optional()
+    body('place_type').exists().withMessage('place_type is missing')
       .trim()
       .customSanitizer(value => value.toLowerCase())
       .isIn(['google', 'lenscape']),
-    body('place_id').optional()
+    body('place_id').optional({ nullable: false, checkFalsy: false })
       .custom((value, { req }) => {
+        if (value == false) { return new Promise((resolve) => resolve(undefined)) }
         let type = req.body.place_type
         if (type === 'google') {
           return gmap.place({ placeid: value }).asPromise()

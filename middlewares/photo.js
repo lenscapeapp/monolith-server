@@ -50,7 +50,17 @@ module.exports = {
 
         let location
         if (placeType === 'lenscape') {
-          location = await LocationTag.findOne({ where: { id: placeId } })
+          if (placeId) {
+            location = await LocationTag.findOne({ where: { id: placeId } })
+          } else {
+            let { location_name: locationName, latlong } = req.data
+            let [lat, long] = latlong.split(',').map(Number)
+            location = await LocationTag.create({
+              name: locationName,
+              lat,
+              long
+            }, { transaction: t })
+          }
         } else if (placeType === 'google') {
           let gplace = (await (gmap.place({ placeid: placeId }).asPromise())).json.result
 
@@ -64,14 +74,6 @@ module.exports = {
             },
             transaction: t
           }))[0]
-        } else {
-          let { location_name: locationName, latlong } = req.data
-          let [lat, long] = latlong.split(',').map(Number)
-          location = await LocationTag.create({
-            name: locationName,
-            lat,
-            long
-          }, { transaction: t })
         }
         let photo = await req.user.createPhoto({
           name: imageName,

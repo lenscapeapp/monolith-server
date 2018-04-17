@@ -51,6 +51,7 @@ describe('Upload photo', () => {
       .field('image_name', info.imageName)
       .field('location_name', info.locationName)
       .field('latlong', `${info.location.latitude()}, ${info.location.longitude()}`)
+      .field('place_type', 'lenscape')
       .then(res => {
         res.should.have.status(200)
 
@@ -84,7 +85,8 @@ describe('Upload photo', () => {
       .set('Authorization', `Bearer ${usertoken}`)
       .attach('picture', fs.readFileSync(path.join(__dirname, 'materials', 'photo2.jpg')), 'photo.jpg')
       .field('image_name', info.imageName)
-      .field('gplace_id', info.placeId)
+      .field('place_id', info.placeId)
+      .field('place_type', 'google')
       .then(res => {
         res.should.have.status(200)
 
@@ -126,6 +128,7 @@ describe('Upload photo', () => {
       .field('image_name', info.imageName)
       .field('location_name', info.locationName)
       .field('latlong', `${info.location}`)
+      .field('place_type', 'lenscape')
       .then(res => {
         res.should.have.status(200)
 
