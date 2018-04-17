@@ -4,7 +4,7 @@ const gmap = require('../../functions/gmap')
 const { LocationTag } = require('../../models')
 
 const DEFAULT_PAGE_SIZE = 25
-const MAX_INT = Math.pow(2 ^ 31)
+const MAX_INT = Math.pow(2, 31)
 
 module.exports = {
   aroundme: [
