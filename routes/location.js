@@ -8,7 +8,7 @@ const Response = require('../middlewares/response')
 
 const router = new Router()
 
-router.route('/locations')
+router.route('/')
   .get(
     Authentication.authenticate,
     Guard.listLocation,
@@ -17,7 +17,7 @@ router.route('/locations')
     Response.response
   )
 
-router.route('/location/:location_id')
+router.route('/:location_id')
   .get(
     Authentication.authenticate,
     Guard.getLocation,
@@ -26,7 +26,7 @@ router.route('/location/:location_id')
     Response.response
   )
 
-router.route('/location/:location_id/photos')
+router.route('/:location_id/photos')
   .get(
     Authentication.authenticate,
     Guard.getLocationPhoto,

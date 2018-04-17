@@ -33,8 +33,8 @@ router.use('*', (req, res, next) => {
 })
 
 router.use('/', authRouter)
-router.use('/me', userRouter)
 router.use('/', photoRouter)
-router.use('/', locationRouter)
+router.use('/me', userRouter)
+router.use('/location', locationRouter)
 
 module.exports = router
