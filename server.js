@@ -25,7 +25,8 @@ app.use((req, res, next) => {
 app.use('/', rootRouter)
 
 app.use((err, req, res, next) => {
-  logger.error(err)
+  let { message, name, stack } = err
+  logger.error({ message, name, stack })
   if (res.statusCode >= 500 && res.statusCode <= 599) {
     if (!CONSTANTS.DEBUG && CONSTANTS.IS_PRODUCTION) {
       res.sendStatus(res.statusCode)

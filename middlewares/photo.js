@@ -1,5 +1,5 @@
+const GeoPoint = require('geopoint')
 const gmap = require('../functions/gmap')
-const response = require('../response-scheme')
 const { LocationTag, Photo, sequelize } = require('../models')
 
 const Op = sequelize.Op
@@ -55,11 +55,21 @@ module.exports = {
           } else {
             let { location_name: locationName, latlong } = req.data
             let [lat, long] = latlong.split(',').map(Number)
-            location = await LocationTag.create({
-              name: locationName,
-              lat,
-              long
-            }, { transaction: t })
+            let userLocation = new GeoPoint(lat, long)
+            let [swBound, neBound] = userLocation.boundingCoordinates(0.01, 0, true)
+            location = (await LocationTag.findOrCreate({
+              where: {
+                name: locationName,
+                lat: { [Op.between]: [swBound.latitude(), neBound.latitude()] },
+                long: { [Op.between]: [swBound.longitude(), neBound.longitude()] }
+              },
+              defaults: {
+                name: locationName,
+                lat,
+                long
+              },
+              transaction: t
+            }))[0]
           }
         } else if (placeType === 'google') {
           let gplace = (await (gmap.place({ placeid: placeId }).asPromise())).json.result
@@ -80,7 +90,6 @@ module.exports = {
           extension: req.file.mimetype.split('/')[1],
           type: 'photo'
         }, { transaction: t })
-
         await location.addPhoto(photo, { transaction: t })
         await photo.upload(req.file)
 

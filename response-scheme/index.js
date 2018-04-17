@@ -43,6 +43,7 @@ function getResponse (model, req) {
     }
   } else if (model instanceof models.LocationTag) {
     result = Object.assign(result, {
+      id: states.id,
       name: states.name,
       latitude: states.lat,
       longitude: states.long
