@@ -1,16 +1,26 @@
 const { Router } = require('express')
 
-const { Auth } = require('../functions')
 const Authentication = require('../middlewares/authentication')
+const User = require('../middlewares/user')
+const Request = require('../middlewares/request')
+const Response = require('../middlewares/response')
 
 const router = new Router()
 
-router.get('/me', Authentication.authenticate, async (req, res, next) => {
-  try {
-    res.json(await req.user.getProfile())
-  } catch (error) {
-    next(error)
-  }
-})
+router.route('/photos')
+  .get(
+    Authentication.authenticate,
+    Request.paginationValidation,
+    Request.activateGuard,
+    User.getPhoto,
+    Response.paginate
+  )
+
+router.route('/')
+  .get(
+    Authentication.authenticate,
+    User.getUser,
+    Response.response
+  )
 
 module.exports = router

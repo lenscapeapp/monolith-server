@@ -33,7 +33,7 @@ router.use('*', (req, res, next) => {
 })
 
 router.use('/', authRouter)
-router.use('/', userRouter)
+router.use('/me', userRouter)
 router.use('/', photoRouter)
 router.use('/', locationRouter)
 
