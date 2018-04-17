@@ -34,6 +34,10 @@ module.exports = (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    number_of_likes: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
     }
   }, {})
   Photo.associate = function (models) {
@@ -47,6 +51,14 @@ module.exports = (sequelize, DataTypes) => {
     })
     Photo.belongsTo(models.LocationTag, {
       foreignKey: 'locationtag_id'
+    })
+    Photo.belongsToMany(models.User, {
+      through: {
+        model: models.Like,
+        unique: true
+      },
+      as: 'LikedUsers',
+      foreignKey: 'photo_id'
     })
   }
 
