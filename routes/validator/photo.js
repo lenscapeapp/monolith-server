@@ -47,12 +47,9 @@ module.exports = {
       ],
       body('gplace_id')
         .exists().withMessage('gplace_id is missing'),
-      [
-        body('place_id')
-          .exists().withMessage('place_id is missing'),
-        body('place_type')
-          .exists().withMessage('place_type is missing')
-      ]
+      body('place_id')
+        .exists().withMessage('place_id is missing')
+        
     ], 'either latlong and location_name or gplace_id or place_id and place_type is required'),
     body('latlong').optional()
       .isLatLong().withMessage('latlong value is invalid'),
@@ -68,12 +65,13 @@ module.exports = {
             throw new Error('invalid gplace_id')
           })
       }),
-    body('place_type').optional()
+    body('place_type').exists().withMessage('place_type is missing')
       .trim()
       .customSanitizer(value => value.toLowerCase())
       .isIn(['google', 'lenscape']),
-    body('place_id').optional()
+    body('place_id').optional({ nullable: false, checkFalsy: false })
       .custom((value, { req }) => {
+        if (value == false) { return new Promise((resolve) => resolve(undefined)) }
         let type = req.body.place_type
         if (type === 'google') {
           return gmap.place({ placeid: value }).asPromise()
