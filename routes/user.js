@@ -7,6 +7,13 @@ const Response = require('../middlewares/response')
 
 const router = new Router()
 
+router.route('/')
+  .get(
+    Authentication.authenticate,
+    User.getUser,
+    Response.response
+  )
+
 router.route('/photos')
   .get(
     Authentication.authenticate,
@@ -16,11 +23,13 @@ router.route('/photos')
     Response.paginate
   )
 
-router.route('/')
+router.route('/photos/liked')
   .get(
     Authentication.authenticate,
-    User.getUser,
-    Response.response
+    Request.paginationValidation,
+    Request.activateGuard,
+    User.getLikedPhoto,
+    Response.paginate
   )
 
 module.exports = router
