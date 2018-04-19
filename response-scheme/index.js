@@ -26,7 +26,8 @@ function getResponse (model, req) {
       number_of_likes: model.number_of_likes,
       thumbnail_link: links.thumbnail,
       picture_link: links.resized,
-      original_url: links.original
+      original_url: links.original,
+      timestamp: model.createdAt.getTime()
     })
 
     if (model.Owner !== undefined) {
