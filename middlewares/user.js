@@ -43,6 +43,7 @@ module.exports = {
         through: {
           where: { user_id: req.user.id }
         },
+        required: true,
         duplicating: false // This is here to prevent subquery generation https://github.com/sequelize/sequelize/issues/3007
       }],
       order: [['LikedUsers', 'createdAt', 'DESC']],
