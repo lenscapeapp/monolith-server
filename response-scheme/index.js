@@ -1,17 +1,17 @@
 const GeoPoint = require('geopoint')
 
+const GooglePlace = require('../models/data-objects/goopleplace')
 const models = require('../models')
-const { PLACEHOLDER_PROFILE_URL } = require('../config/constants')
+const { PLACEHOLDER_PROFILE_URL, IS_NEAR_DISTANCE } = require('../config/constants')
 
 function getResponse (model, req) {
-  let states = model.get()
   let result = {}
   if (model instanceof models.User) {
     result = Object.assign(result, {
-      id: states.id,
-      firstname: states.firstname,
-      lastname: states.lastname,
-      email: states.email
+      id: model.id,
+      firstname: model.firstname,
+      lastname: model.lastname,
+      email: model.email
     })
     if (model.CurrentProfilePhoto !== undefined) {
       result = Object.assign(result, {
@@ -21,17 +21,18 @@ function getResponse (model, req) {
   } else if (model instanceof models.Photo) {
     let links = model.getUrls()
     result = Object.assign(result, {
-      id: states.id,
-      name: states.name,
-      number_of_likes: states.number_of_likes,
+      id: model.id,
+      name: model.name,
+      number_of_likes: model.number_of_likes,
       thumbnail_link: links.thumbnail,
       picture_link: links.resized,
-      original_url: links.original
+      original_url: links.original,
+      timestamp: model.createdAt.getTime()
     })
 
     if (model.Owner !== undefined) {
       result = Object.assign(result, {
-        is_owner: states.owner_id === req.user.id,
+        is_owner: model.owner_id === req.user.id,
         owner: getResponse(model.Owner, req)
       })
     }
@@ -43,18 +44,37 @@ function getResponse (model, req) {
     }
   } else if (model instanceof models.LocationTag) {
     result = Object.assign(result, {
-      id: states.id,
-      name: states.name,
-      latitude: states.lat,
-      longitude: states.long
+      id: model.id,
+      name: model.name,
+      address: model.address,
+      latitude: model.lat,
+      longitude: model.long,
+      is_google_place: false
     })
 
     if (req.location instanceof GeoPoint) {
-      let photoLocation = new GeoPoint(states.lat, states.long)
+      let photoLocation = new GeoPoint(model.lat, model.long)
       let distance = photoLocation.distanceTo(req.location, true)
       result = Object.assign(result, {
         distance,
-        is_near: distance <= 2
+        is_near: distance <= IS_NEAR_DISTANCE
+      })
+    }
+  } else if (model instanceof GooglePlace) {
+    result = Object.assign(result, {
+      id: model.gplace_id,
+      name: model.name,
+      address: model.address,
+      latitude: model.location.latitude(),
+      longitude: model.location.longitude(),
+      is_google_place: true
+    })
+
+    if (req.location instanceof GeoPoint) {
+      let distance = req.location.distanceTo(model.location, true)
+      result = Object.assign(result, {
+        distance,
+        is_near: distance <= IS_NEAR_DISTANCE
       })
     }
   }

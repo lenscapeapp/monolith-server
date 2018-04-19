@@ -11,15 +11,6 @@ const Response = require('../middlewares/response')
 const router = new Router()
 const upload = multer({ fileFilter: File.photoFormatFilter })
 
-router.route('/aroundme/photos')
-  .get(
-    Guard.aroundme,
-    Request.activateGuard,
-    Authentication.authenticate,
-    Photo.aroundme,
-    Response.paginate
-  )
-
 router.route('/photo')
   .post(
     upload.single('picture'),
