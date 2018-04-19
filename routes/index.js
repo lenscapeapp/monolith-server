@@ -2,6 +2,7 @@ const GeoPoint = require('geopoint')
 const { Router } = require('express')
 
 // Logic router
+const aroundmeRouter = require('./aroundme')
 const authRouter = require('./auth')
 const userRouter = require('./user')
 const photoRouter = require('./photo')
@@ -34,7 +35,8 @@ router.use('*', (req, res, next) => {
 
 router.use('/', authRouter)
 router.use('/', photoRouter)
-router.use('/me', userRouter)
+router.use('/aroundme', aroundmeRouter)
 router.use('/location', locationRouter)
+router.use('/me', userRouter)
 
 module.exports = router
