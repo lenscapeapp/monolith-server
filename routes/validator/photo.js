@@ -136,6 +136,25 @@ module.exports = {
       })
   ],
 
+  listPhoto: [
+    query('target_latlong')
+      .exists().withMessage('target_latlong is missing')
+      .isLatLong().withMessage('target_latlong must be in "latitude,longitude" format'),
+    query('user_latlong')
+      .exists().withMessage('user_latlong is missing')
+      .isLatLong().withMessage('user_latlong must be in "latitude,longitude" format'),
+    query('month')
+      .optional()
+      .isInt({min: 0, max: 12})
+      .withMessage('month must be an integer between 0 and 12'),
+    (req, res, next) => {
+      req.data = Object.assign(req.data || {}, {
+        month: 0
+      })
+      next()
+    }
+  ],
+
   liked: [
     param('photo_id')
       .exists()

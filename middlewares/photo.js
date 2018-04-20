@@ -1,6 +1,7 @@
 const GeoPoint = require('geopoint')
 const gmap = require('../functions/gmap')
 const { LocationTag, Photo, sequelize } = require('../models')
+const { DEFAULT_QUERY_RADIUS } = require('../config/constants')
 
 const Op = sequelize.Op
 const RADIUS = 5 // km
@@ -113,6 +114,43 @@ module.exports = {
 
     res.states.data = likedUsers
     next()
+  },
+
+  async listPhoto (req, res, next) {
+    let { page, size, startId, month, targetLocation } = req.data
+    let [swBound, neBound] = targetLocation.boundingCoordinates(DEFAULT_QUERY_RADIUS, 0, true)
+
+    let monthQuery = sequelize.where(sequelize.fn('date_part', 'month', sequelize.col('Photo.createdAt')), month)
+
+    try {
+      let {count, rows} = await Photo.scope('withOwner').findAndCount({
+        where: sequelize.and(
+          { type: 'photo', id: { [Op.lte]: startId } },
+          month > 0 ? monthQuery : {}
+        ),
+        order: [['createdAt', 'DESC']],
+        include: [{
+          association: Photo.associations.LocationTag,
+          where: {
+            lat: { [Op.between]: [swBound.latitude(), neBound.latitude()] },
+            long: { [Op.between]: [swBound.longitude(), neBound.longitude()] }
+          }
+        }],
+        limit: size,
+        offset: size * (page - 1)
+      })
+
+      res.states = {
+        count,
+        data: rows,
+        page,
+        size
+      }
+      next()
+    } catch (error) {
+      res.statusCode = 500
+      next(error)
+    }
   },
 
   async liked (req, res, next) {
