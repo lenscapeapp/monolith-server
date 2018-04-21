@@ -91,10 +91,7 @@ module.exports = {
         }
       },
       include: [{
-        association: Photo.associations.LikedUsers,
-        where: {
-          id: req.user.id
-        }
+        association: Photo.associations.LikedUsers
       }],
       order: [['createdAt', 'DESC']],
       limit: size,
