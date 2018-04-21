@@ -111,48 +111,4 @@ describe('Upload photo', () => {
       })
       .catch(err => done(err))
   }).timeout(30e3)
-
-  it('should give photo around the given location', done => {
-    let info = {
-      center: new GeoPoint(13.846209, 100.568662),
-      imageName: faker.address.streetName(),
-      locationName: faker.address.streetAddress()
-    }
-    info.location = cfaker.address.latlong(info.center, 1)
-    let [lat, long] = info.location.split(',').map(Number)
-
-    chai.request(server)
-      .post('/photo')
-      .set('Authorization', `Bearer ${usertoken}`)
-      .attach('picture', fs.readFileSync(path.join(__dirname, 'materials', 'photo1.jpg')), 'photo.jpg')
-      .field('image_name', info.imageName)
-      .field('location_name', info.locationName)
-      .field('latlong', `${info.location}`)
-      .field('place_type', 'lenscape')
-      .then(res => {
-        res.should.have.status(200)
-
-        return chai.request(server)
-          .get(`/aroundme/photos/?latlong=${info.center.latitude()}, ${info.center.longitude()}`)
-          .set('Authorization', `Bearer ${usertoken}`)
-          .then(res2 => {
-            let found = false
-            res2.body.data.forEach(photo => {
-              if (photo.id === res.body.id) {
-                found = true
-                let { location: expectLocation, owner: expectOwner, ...expectInfo } = res.body
-                let { location, owner, ...photoinfo } = photo
-                expect(location).to.include(expectLocation)
-                expect(owner).to.deep.equals(expectOwner)
-                expect(photoinfo).to.deep.equals({ is_liked: false, ...expectInfo })
-                return done()
-              }
-            })
-            if (!found) {
-              throw new Error('Uploaded photo is missing')
-            }
-          })
-      })
-      .catch(err => done(err))
-  }).timeout(60e3)
 })
