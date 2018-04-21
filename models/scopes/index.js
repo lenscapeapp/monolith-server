@@ -30,4 +30,9 @@ module.exports = models => {
       association: Photo.associations.LocationTag
     }]
   })
+  Photo.addScope('withLikes', {
+    include: [{
+      association: Photo.associations.LikedUsers
+    }]
+  })
 }
