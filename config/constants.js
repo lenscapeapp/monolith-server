@@ -20,6 +20,7 @@ module.exports = {
   DEBUG: process.env.DEBUG_MODE === 'true',
   DEFAULT_NEARBY_RADIUS: 5,
   DEFAULT_PAGE_SIZE: 25,
+  DEFAULT_QUERY_RADIUS: 5,
   DEFAULT_SECRET,
   GCLOUD_PROJECT_ID: 'lenscapeapp',
   IMAGINARY_BASEURL: IS_PRODUCTION ? 'http://imaginary:9000' : 'http://localhost:9000',

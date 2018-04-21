@@ -36,6 +36,16 @@ module.exports = {
     })
   },
 
+  getPrefinedStates (req, res, next) {
+    let { user_latlong: uLatlong, target_latlong: tLatlong } = req.data
+    req.data = Object.assign(req.data, {
+      userLocation: uLatlong ? new GeoPoint(...(uLatlong.split(',').map(Number))) : undefined,
+      targetLocation: tLatlong ? new GeoPoint(...(tLatlong.split(',').map(Number))) : undefined
+    })
+    req.location = req.data.userLocation
+    next()
+  },
+
   paginationValidation: [
     check('page')
       .optional({ checkFalsy: false })
