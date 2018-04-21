@@ -140,7 +140,7 @@ describe('Upload photo', () => {
             res2.body.data.forEach(photo => {
               if (photo.id === res.body.id) {
                 found = true
-                let { location: expectLocation, owner: expectOwner, ...expectInfo } = res.body
+                let { location: expectLocation, owner: expectOwner, is_liked, ...expectInfo } = res.body
                 let { location, owner, ...photoinfo } = photo
                 expect(location).to.include(expectLocation)
                 expect(owner).to.deep.equals(expectOwner)
