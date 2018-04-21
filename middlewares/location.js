@@ -90,6 +90,12 @@ module.exports = {
           [Op.lte]: startId
         }
       },
+      include: [{
+        association: Photo.associations.LikedUsers,
+        where: {
+          id: req.user.id
+        }
+      }],
       order: [['createdAt', 'DESC']],
       limit: size,
       offset: size * (page - 1)

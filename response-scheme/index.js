@@ -42,6 +42,12 @@ function getResponse (model, req) {
         location: getResponse(model.LocationTag, req)
       })
     }
+
+    if (model.LikedUsers) {
+      result = Object.assign(result, {
+        is_liked: model.LikedUsers.some(user => user.id === req.user.id)
+      })
+    }
   } else if (model instanceof models.LocationTag) {
     result = Object.assign(result, {
       id: model.id,

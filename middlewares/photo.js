@@ -135,6 +135,11 @@ module.exports = {
             lat: { [Op.between]: [swBound.latitude(), neBound.latitude()] },
             long: { [Op.between]: [swBound.longitude(), neBound.longitude()] }
           }
+        }, {
+          association: Photo.associations.LikedUsers,
+          where: {
+            id: req.user.id
+          }
         }],
         limit: size,
         offset: size * (page - 1)
