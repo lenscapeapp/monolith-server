@@ -32,8 +32,7 @@ module.exports = {
 
   async getLikedPhoto (req, res, next) {
     let { page, size, startId } = req.data
-
-    let {count, rows} = await Photo.findAndCount({
+    let {count, rows} = await Photo.scope(['withOwner', 'withLocation']).findAndCount({
       where: {
         type: 'photo',
         id: { [Op.lte]: startId }
