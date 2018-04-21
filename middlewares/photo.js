@@ -123,7 +123,7 @@ module.exports = {
     let monthQuery = sequelize.where(sequelize.fn('date_part', 'month', sequelize.col('Photo.createdAt')), month)
 
     try {
-      let {count, rows} = await Photo.scope('withOwner').findAndCount({
+      let {count, rows} = await Photo.scope('withOwner', 'withLikes').findAndCount({
         where: sequelize.and(
           { type: 'photo', id: { [Op.lte]: startId } },
           month > 0 ? monthQuery : {}
@@ -162,6 +162,7 @@ module.exports = {
     photo.number_of_likes += likes[0] ? likes[0].length : 0
     await photo.save()
 
+    photo = await photo.reload()
     res.states.data = photo
     next()
   },
@@ -175,6 +176,7 @@ module.exports = {
     photo.number_of_likes -= unlikes
     await photo.save()
 
+    photo = await photo.reload()
     res.states.data = photo
     next()
   }
