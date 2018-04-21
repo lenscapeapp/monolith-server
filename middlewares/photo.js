@@ -136,10 +136,7 @@ module.exports = {
             long: { [Op.between]: [swBound.longitude(), neBound.longitude()] }
           }
         }, {
-          association: Photo.associations.LikedUsers,
-          where: {
-            id: req.user.id
-          }
+          association: Photo.associations.LikedUsers
         }],
         limit: size,
         offset: size * (page - 1)
