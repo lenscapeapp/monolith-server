@@ -90,9 +90,6 @@ module.exports = {
           [Op.lte]: startId
         }
       },
-      include: [{
-        association: Photo.associations.LikedUsers
-      }],
       order: [['createdAt', 'DESC']],
       limit: size,
       offset: size * (page - 1)
