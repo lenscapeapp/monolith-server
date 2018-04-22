@@ -46,7 +46,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM(...SEASONS)
     },
     date_taken: {
-      type: DataTypes.DATEONLY
+      type: DataTypes.DATE
     }
   }, {})
   Photo.associate = function (models) {

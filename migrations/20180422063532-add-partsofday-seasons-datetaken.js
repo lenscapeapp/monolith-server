@@ -12,7 +12,7 @@ module.exports = {
         type: Sequelize.ENUM(...SEASONS)
       }),
       queryInterface.addColumn('Photos', 'date_taken', {
-        type: Sequelize.DATEONLY
+        type: Sequelize.DATE
       })
     ])
   },
@@ -21,7 +21,9 @@ module.exports = {
     return Promise.all([
       queryInterface.removeColumn('Photos', 'part_of_day'),
       queryInterface.removeColumn('Photos', 'season'),
-      queryInterface.removeColumn('Photos', 'date_taken')
+      queryInterface.removeColumn('Photos', 'date_taken'),
+      queryInterface.sequelize.query('DROP TYPE "enum_Photos_part_of_day"'),
+      queryInterface.sequelize.query('DROP TYPE "enum_Photos_season"')
     ])
   }
 }

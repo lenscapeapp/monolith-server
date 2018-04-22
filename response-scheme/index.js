@@ -1,4 +1,5 @@
 const GeoPoint = require('geopoint')
+const moment = require('moment')
 
 const GooglePlace = require('../models/data-objects/goopleplace')
 const models = require('../models')
@@ -27,7 +28,10 @@ function getResponse (model, req) {
       thumbnail_link: links.thumbnail,
       picture_link: links.resized,
       original_url: links.original,
-      timestamp: model.createdAt.getTime()
+      timestamp: model.createdAt.getTime(),
+      date_taken: model.date_taken && model.date_taken.getTime(),
+      timestamp_string: moment(model.createdAt).format('D MMMM YYYY'),
+      date_taken_string: moment(model.date_taken).format('D MMMM YYYY')
     })
 
     if (model.Owner !== undefined) {
