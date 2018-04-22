@@ -1,5 +1,3 @@
-import { query } from 'express-validator/check';
-
 'use strict'
 
 const { PARTS_OF_DAY, SEASONS } = require('../config/constants')
