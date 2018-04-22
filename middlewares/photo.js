@@ -1,7 +1,7 @@
 const GeoPoint = require('geopoint')
 const gmap = require('../functions/gmap')
 const { LocationTag, Photo, sequelize } = require('../models')
-const { DEFAULT_QUERY_RADIUS } = require('../config/constants')
+const { DEFAULT_QUERY_RADIUS, PARTS_OF_DAY, SEASONS } = require('../config/constants')
 
 const Op = sequelize.Op
 const RADIUS = 5 // km
@@ -47,6 +47,8 @@ module.exports = {
     try {
       let photo = await sequelize.transaction(async t => {
         let { image_name: imageName, gplace_id: gplaceId, place_id: placeId, place_type: placeType } = req.data
+        let { date_taken: dateTaken, season, time_taken: timeTaken } = req.data
+        dateTaken = new Date(dateTaken)
         if (gplaceId) { placeId = gplaceId; placeType = 'google' }
 
         let location
@@ -89,7 +91,10 @@ module.exports = {
         let photo = await req.user.createPhoto({
           name: imageName,
           extension: req.file.mimetype.split('/')[1],
-          type: 'photo'
+          type: 'photo',
+          date_taken: dateTaken,
+          season: SEASONS[season],
+          part_of_day: PARTS_OF_DAY[timeTaken]
         }, { transaction: t })
         await location.addPhoto(photo, { transaction: t })
         await photo.upload(req.file)

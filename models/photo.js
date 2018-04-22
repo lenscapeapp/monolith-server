@@ -1,6 +1,6 @@
 'use strict'
 
-const { PHOTO_SIZE, BUCKET_BASEURL } = require('../config/constants')
+const { PARTS_OF_DAY, PHOTO_SIZE, BUCKET_BASEURL, SEASONS } = require('../config/constants')
 const File = require('../functions/file')
 const Resize = require('../functions/resize')
 const Bucket = require('../functions/bucket')
@@ -38,6 +38,15 @@ module.exports = (sequelize, DataTypes) => {
     number_of_likes: {
       type: DataTypes.INTEGER,
       defaultValue: 0
+    },
+    part_of_day: {
+      type: DataTypes.ENUM(...PARTS_OF_DAY)
+    },
+    season: {
+      type: DataTypes.ENUM(...SEASONS)
+    },
+    date_taken: {
+      type: DataTypes.DATE
     }
   }, {})
   Photo.associate = function (models) {

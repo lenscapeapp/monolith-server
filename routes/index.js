@@ -1,6 +1,9 @@
 const GeoPoint = require('geopoint')
 const { Router } = require('express')
 
+const { PARTS_OF_DAY, SEASONS } = require('../config/constants')
+const Response = require('../middlewares/response')
+
 // Logic router
 const aroundmeRouter = require('./aroundme')
 const authRouter = require('./auth')
@@ -38,5 +41,31 @@ router.use('/', photoRouter)
 router.use('/aroundme', aroundmeRouter)
 router.use('/location', locationRouter)
 router.use('/me', userRouter)
+
+router.route('/seasons')
+  .get(
+    (req, res, next) => {
+      let data = SEASONS.map((season, index) => {
+        return {
+          id: index,
+          name: season
+        }
+      })
+      res.json({ data })
+    }
+  )
+
+router.route('/times')
+  .get(
+    (req, res, next) => {
+      let data = PARTS_OF_DAY.map((season, index) => {
+        return {
+          id: index,
+          name: season
+        }
+      })
+      res.json({ data })
+    }
+  )
 
 module.exports = router

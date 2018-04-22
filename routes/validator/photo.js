@@ -2,6 +2,7 @@ const { body, param, query, oneOf } = require('express-validator/check')
 
 const gmap = require('../../functions/gmap')
 const { LocationTag, Photo } = require('../../models')
+const { PARTS_OF_DAY, SEASONS } = require('../../config/constants')
 
 const DEFAULT_PAGE_SIZE = 25
 const MAX_INT = Math.pow(2, 31)
@@ -98,7 +99,16 @@ module.exports = {
             })
         }
       }),
-
+    body('season')
+      .exists().withMessage('season is missing')
+      .isInt({ min: 0, max: SEASONS.length - 1 }).withMessage(`season must be an integer from 0 to ${SEASONS.length - 1}`),
+    body('time_taken')
+      .exists().withMessage('time_taken is missing')
+      .isInt({ min: 0, max: PARTS_OF_DAY.length - 1 }).withMessage(`time_taken must be an integer from 0 to ${PARTS_OF_DAY.length - 1}`),
+    body('date_taken')
+      .exists().withMessage('date_taken is missing')
+      .isInt({ min: 0 }).withMessage('date_taken must be an UNIX timestamp ')
+      .toInt(),
     (req, res, next) => {
       if (req.file) return next()
       if (!req.body.picture) {

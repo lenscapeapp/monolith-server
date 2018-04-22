@@ -28,10 +28,12 @@ module.exports = {
   IS_PRODUCTION,
   IS_TEST,
   LOG_LEVEL: process.env.LOG_LEVEL || 'silly',
+  PARTS_OF_DAY: ['Dawn', 'Early Morning', 'Morning', 'Noon', 'Afternoon', 'Evening', 'Night', 'Midnight'],
   PHOTO_SIZE: {
     'thumbnail': 400,
     'resized': 2000
   },
   PLACEHOLDER_PROFILE_URL: `${BUCKET_BASEURL}/placeholder/profile.jpg`,
+  SEASONS: ['Winter', 'Spring', 'Summer', 'Autumn'],
   SECRET: process.env.APP_SECRET || DEFAULT_SECRET
 }
