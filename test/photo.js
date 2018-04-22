@@ -3,10 +3,11 @@ const chaiHttp = require('chai-http')
 const faker = require('faker')
 const fs = require('fs')
 const GeoPoint = require('geopoint')
-const gmap = require('../functions/gmap')
 const path = require('path')
 const { URL } = require('url')
 
+const { PARTS_OF_DAY, SEASONS } = require('../config/constants')
+const gmap = require('../functions/gmap')
 const cfaker = require('./cfaker')
 const server = require('../server')
 
@@ -15,7 +16,6 @@ const expect = chai.expect
 chai.use(chaiHttp)
 
 describe('Upload photo', () => {
-
   let usertoken = ''
   let user = null
 
@@ -41,8 +41,13 @@ describe('Upload photo', () => {
     let info = {
       location: new GeoPoint(13.846209, 100.568662),
       imageName: faker.address.streetName(),
-      locationName: faker.address.streetAddress()
+      locationName: faker.address.streetAddress(),
+      time_taken: Math.floor(Math.random() * PARTS_OF_DAY.length),
+      season: Math.floor(Math.random() * SEASONS.length),
+      date_taken: Date.now() - 1000 * 60 * 60
     }
+    let timeTaken = PARTS_OF_DAY[info.time_taken]
+    let season = SEASONS[info.season]
 
     chai.request(server)
       .post('/photo')
@@ -52,6 +57,9 @@ describe('Upload photo', () => {
       .field('location_name', info.locationName)
       .field('latlong', `${info.location.latitude()}, ${info.location.longitude()}`)
       .field('place_type', 'lenscape')
+      .field('date_taken', info.date_taken)
+      .field('time_taken', info.time_taken)
+      .field('season', info.season)
       .then(res => {
         res.should.have.status(200)
 
@@ -77,9 +85,12 @@ describe('Upload photo', () => {
   it('should upload photo with google place successfully', done => {
     let info = {
       placeId: 'ChIJZ__jS-ec4jARzA2pigUpDXQ',
-      imageName: faker.address.streetName()
+      imageName: faker.address.streetName(),
+      time_taken: Math.floor(Math.random() * PARTS_OF_DAY.length),
+      season: Math.floor(Math.random() * SEASONS.length),
+      date_taken: Date.now() - 1000 * 60 * 60
     }
-    
+
     chai.request(server)
       .post('/photo')
       .set('Authorization', `Bearer ${usertoken}`)
@@ -87,6 +98,9 @@ describe('Upload photo', () => {
       .field('image_name', info.imageName)
       .field('place_id', info.placeId)
       .field('place_type', 'google')
+      .field('date_taken', info.date_taken)
+      .field('time_taken', info.time_taken)
+      .field('season', info.season)
       .then(res => {
         res.should.have.status(200)
 
