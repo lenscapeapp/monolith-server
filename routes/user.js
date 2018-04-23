@@ -32,4 +32,11 @@ router.route('/photos/liked')
     Response.paginate
   )
 
+router.route('/locations')
+  .get(
+    Authentication.authenticate,
+    User.getUploadLocation,
+    Response.response
+  )
+
 module.exports = router

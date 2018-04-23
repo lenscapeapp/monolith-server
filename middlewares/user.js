@@ -1,4 +1,4 @@
-const { Photo, sequelize, Like } = require('../models')
+const { Photo, sequelize, LocationTag } = require('../models')
 
 const Op = sequelize.Op
 
@@ -54,6 +54,23 @@ module.exports = {
     res.states.count = count
     res.states.page = page
     res.states.size = size
+    next()
+  },
+
+  async getUploadLocation (req, res, next) {
+    let locations = await LocationTag.findAll({
+      include: [{
+        association: LocationTag.associations.Photos,
+        required: true,
+        where: {
+          owner_id: req.user.id,
+          type: 'photo'
+        }
+      }],
+      order: [['Photos', 'createdAt', 'DESC']]
+    })
+
+    res.states.data = locations
     next()
   }
 }
