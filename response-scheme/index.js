@@ -70,6 +70,12 @@ function getResponse (model, req) {
         is_near: distance <= IS_NEAR_DISTANCE
       })
     }
+
+    if (model.Photos instanceof Array) {
+      result = Object.assign(result, {
+        photos: model.Photos.map(photo => getResponse(photo, req))
+      })
+    }
   } else if (model instanceof GooglePlace) {
     result = Object.assign(result, {
       id: model.gplace_id,
