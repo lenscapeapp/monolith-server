@@ -1,8 +1,8 @@
 const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 const IS_TEST = process.env.NODE_ENV === 'test'
 
-const BUCKET_BASEURL = IS_PRODUCTION ? 'https://bucket.lenscape.me' : ('https://storage.googleapis.com/' + (IS_TEST ? 'lenscape_test' : 'lenscape_dev'))
 const BUCKET_NAME = IS_PRODUCTION ? 'lenscape' : (IS_TEST ? 'lenscape_test' : 'lenscape_dev')
+const BUCKET_BASEURL = IS_PRODUCTION ? 'https://bucket.lenscape.me' : ('https://storage.googleapis.com/' + BUCKET_NAME)
 
 const DEFAULT_SECRET = 'secret'
 const CONTENT_TYPE_EXTENSION_MAP = {
@@ -23,7 +23,7 @@ module.exports = {
   DEFAULT_QUERY_RADIUS: 5,
   DEFAULT_SECRET,
   GCLOUD_PROJECT_ID: 'lenscapeapp',
-  IMAGINARY_BASEURL: IS_PRODUCTION ? 'http://imaginary:9000' : 'http://localhost:9000',
+  IMAGINARY_BASEURL: IS_PRODUCTION ? 'http://imaginary:9000' : (process.env.IMAGINARY_BASEURL || 'http://localhost:9000'),
   IS_NEAR_DISTANCE: 2,
   IS_PRODUCTION,
   IS_TEST,
