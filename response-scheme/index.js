@@ -76,7 +76,8 @@ function getResponse (model, req) {
 
     if (model.Photos instanceof Array) {
       result = Object.assign(result, {
-        photos: model.Photos.map(photo => getResponse(photo, req))
+        number_of_photos: model.Photos.length,
+        photos: model.pagedPhotos ? model.pagedPhotos.map(photo => getResponse(photo, req)) : model.Photos.map(photo => getResponse(photo, req))
       })
     }
   } else if (model instanceof GooglePlace) {

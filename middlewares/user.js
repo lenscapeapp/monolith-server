@@ -71,7 +71,7 @@ module.exports = {
     })
 
     locations.forEach(location => {
-      location.Photos = location.Photos.slice(0, 3)
+      location.pagedPhotos = location.Photos.slice(0, 4)
     })
 
     res.states.data = locations
