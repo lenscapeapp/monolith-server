@@ -212,5 +212,15 @@ module.exports = {
     res.states.page = req.data.page
     res.states.size = req.data.size
     next()
+  },
+
+  async createView (req, res, next) {
+    let photo = await Photo.findById(req.data.photo_id)
+    photo.viewcount += 1
+    photo.save()
+
+    photo = await photo.reload()
+    res.states.data = photo
+    next()
   }
 }

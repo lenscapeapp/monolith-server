@@ -188,5 +188,17 @@ module.exports = {
         return Photo.findById(value)
           .catch(() => { throw new Error(`cannot find photo with id=${value}`) })
       })
+  ],
+
+  createView: [
+    param('photo_id')
+      .exists()
+      .isInt({ min: 1 })
+      .withMessage('photo_id must be an integer greater than 0')
+      .toInt()
+      .custom(value => {
+        return Photo.findById(value)
+          .catch(() => { throw new Error(`cannot find photo with id=${value}`) })
+      })
   ]
 }
