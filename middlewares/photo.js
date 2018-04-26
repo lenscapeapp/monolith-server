@@ -1,6 +1,6 @@
 const GeoPoint = require('geopoint')
 const gmap = require('../functions/gmap')
-const { LocationTag, Photo, sequelize } = require('../models')
+const { Like, LocationTag, Photo, sequelize } = require('../models')
 const { DEFAULT_QUERY_RADIUS, PARTS_OF_DAY, SEASONS } = require('../config/constants')
 
 const Op = sequelize.Op
@@ -183,6 +183,34 @@ module.exports = {
 
     photo = await photo.reload()
     res.states.data = photo
+    next()
+  },
+
+  async trend (req, res, next) {
+    let now = Date.now()
+    let {count, rows} = await Photo.findAndCount({
+      where: {
+        id: { [Op.lte]: req.data.startId },
+        createdAt: { [Op.gt]: new Date(now - 30 * 24 * 60 * 60 * 1000) }
+      }
+    })
+
+    rows.forEach(photo => {
+      photo.score = photo.LikedUsers.map(likedUser => {
+        let time = now - likedUser.Like.createdAt.getTime()
+        let dayDifference = time / (24 * 60 * 60 * 1000)
+        if (dayDifference <= 1) { return 1 }
+        return Math.pow(2, -((dayDifference - 1) / 7))
+      }).reduce((acc, val) => acc + val, 0)
+    })
+
+    rows.sort((a, b) => b.score - a.score)
+    let lastIndex = req.data.size * req.data.page < rows.length ? req.data.size * req.data.page : rows.length
+    let output = rows.slice(req.data.size * (req.data.page - 1), lastIndex)
+    res.states.count = count
+    res.states.data = output
+    res.states.page = req.data.page
+    res.states.size = req.data.size
     next()
   }
 }
