@@ -70,6 +70,10 @@ module.exports = {
       order: [['Photos', 'createdAt', 'DESC']]
     })
 
+    locations.forEach(location => {
+      location.pagedPhotos = location.Photos.slice(0, 4)
+    })
+
     res.states.data = locations
     next()
   }
