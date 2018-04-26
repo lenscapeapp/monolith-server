@@ -55,4 +55,13 @@ router.route('/photo/:photo_id/like')
     Response.response
   )
 
+router.route('/trend')
+  .get(
+    Request.paginationValidation,
+    Request.activateGuard,
+    Authentication.authenticate,
+    Photo.trend,
+    Response.paginate
+  )
+
 module.exports = router

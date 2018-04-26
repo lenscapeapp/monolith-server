@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "test": "LOG_LEVEL=error NODE_ENV=test mocha --exit"
+    "test": "LOG_LEVEL=error NODE_ENV=test mocha --exit",
+    "start prod": "sequelize db:migrate --env production && node server.js"
   },
   "author": "chinnonae",
   "license": "UNLICENSED",
