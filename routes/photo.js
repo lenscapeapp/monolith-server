@@ -32,6 +32,15 @@ router.route('/photo')
     Response.response
   )
 
+router.route('/photo/:photo_id')
+  .delete(
+    Guard.deletePhoto,
+    Request.activateGuard,
+    Authentication.authenticate,
+    Photo.deletePhoto,
+    Response.response
+  )
+
 router.route('/photo/:photo_id/like')
   .get(
     Guard.listLikes,
