@@ -64,4 +64,13 @@ router.route('/trend')
     Response.paginate
   )
 
+router.route('/photo/:photo_id/view')
+  .post(
+    Guard.createView,
+    Request.activateGuard,
+    Authentication.authenticate,
+    Photo.createView,
+    Response.response
+  )
+
 module.exports = router

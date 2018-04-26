@@ -47,6 +47,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     date_taken: {
       type: DataTypes.DATE
+    },
+    viewcount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
     }
   }, {})
   Photo.associate = function (models) {

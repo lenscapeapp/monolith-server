@@ -33,7 +33,8 @@ function getResponse (model, req) {
       timestamp_string: moment(model.createdAt).format('D MMMM YYYY'),
       date_taken_string: moment(model.date_taken).format('D MMMM YYYY'),
       time_taken: model.part_of_day,
-      season: model.season
+      season: model.season,
+      view: model.viewcount
     })
 
     if (model.Owner !== undefined) {
