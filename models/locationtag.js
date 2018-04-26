@@ -1,4 +1,7 @@
 'use strict'
+
+const gmap = require('../functions/gmap')
+
 module.exports = (sequelize, DataTypes) => {
   var LocationTag = sequelize.define('LocationTag', {
     name: {
@@ -25,5 +28,11 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'locationtag_id'
     })
   }
+
+  LocationTag.addHook('beforeCreate', async locationtag => {
+    let request = await gmap.reverseGeocode({ latlng: [locationtag.lat, locationtag.long] }).asPromise()
+    locationtag.address = request.json.results[0].formatted_address
+  })
+
   return LocationTag
 }
