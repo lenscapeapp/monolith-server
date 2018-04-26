@@ -1,6 +1,6 @@
 const GeoPoint = require('geopoint')
 const gmap = require('../functions/gmap')
-const { Like, LocationTag, Photo, sequelize } = require('../models')
+const { LocationTag, Photo, sequelize } = require('../models')
 const { DEFAULT_QUERY_RADIUS, PARTS_OF_DAY, SEASONS } = require('../config/constants')
 
 const Op = sequelize.Op
