@@ -22,7 +22,11 @@ module.exports = {
     param('location_id')
       .exists().withMessage('location_id is missing')
       .isInt({min: 1})
-      .withMessage('location_id must be an integer greater than 0')
+      .withMessage('location_id must be an integer greater than 0'),
+    query('is_owner')
+      .optional()
+      .isBoolean().withMessage('is_owner must be a boolean')
+      .toBoolean()
   ],
 
   aroundme: [
