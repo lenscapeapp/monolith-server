@@ -81,14 +81,15 @@ module.exports = {
   },
 
   async listLocationPhoto (req, res, next) {
-    let { page, size, startId, location_id: locationId } = req.data
+    let { page, size, startId, location_id: locationId, is_owner: isOwner } = req.data
 
     let {count, rows} = await Photo.findAndCount({
       where: {
         locationtag_id: locationId,
         id: {
           [Op.lte]: startId
-        }
+        },
+        owner_id: isOwner ? req.user.id : { [Op.ne]: null }
       },
       order: [['createdAt', 'DESC']],
       limit: size,
