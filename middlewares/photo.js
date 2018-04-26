@@ -1,6 +1,6 @@
 const GeoPoint = require('geopoint')
 const gmap = require('../functions/gmap')
-const { LocationTag, Photo, sequelize } = require('../models')
+const { Like, LocationTag, Photo, sequelize } = require('../models')
 const { DEFAULT_QUERY_RADIUS, PARTS_OF_DAY, SEASONS } = require('../config/constants')
 
 const Op = sequelize.Op
@@ -108,6 +108,15 @@ module.exports = {
       res.statusCode = 500
       next(err)
     }
+  },
+
+  async deletePhoto (req, res, next) {
+    let photo = await Photo.findById(req.data.photo_id)
+    await Like.destroy({ where: { photo_id: req.data.photo_id } })
+    await photo.destroy()
+
+    res.states.data = photo
+    next()
   },
 
   async listLikes (req, res, next) {

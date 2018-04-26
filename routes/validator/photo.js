@@ -133,6 +133,19 @@ module.exports = {
     }
   ],
 
+  deletePhoto: [
+    param('photo_id')
+      .exists()
+      .isInt({ min: 1 })
+      .withMessage('photo_id must be an integer greater than 0')
+      .toInt()
+      .custom(value => {
+        return Photo.findById(value)
+          // .then(res => )
+          .catch(() => { throw new Error(`cannot find photo with id=${value}`) })
+      })
+  ],
+
   listLikes: [
     param('photo_id')
       .exists()
