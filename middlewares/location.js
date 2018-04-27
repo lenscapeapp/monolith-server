@@ -23,6 +23,8 @@ module.exports = {
       if (gplaces.json.status === 'OK') {
         gplaces = await Promise.all(gplaces.json.predictions.map(prediction => gmap.place({ placeid: prediction.place_id }).asPromise()))
         gplaces = gplaces.map(gplace => gplace.json.result)
+      } else {
+        gplaces = gplaces.json.predictions
       }
       lplaces.sort((a, b) => {
         let query = req.data.search.toLowerCase()
