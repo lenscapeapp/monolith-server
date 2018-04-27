@@ -199,6 +199,7 @@ module.exports = {
     let now = Date.now()
     let {count, rows} = await Photo.findAndCount({
       where: {
+        type: 'photo',
         id: { [Op.lte]: req.data.startId },
         createdAt: { [Op.gt]: new Date(now - 30 * 24 * 60 * 60 * 1000) }
       }
