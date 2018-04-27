@@ -227,7 +227,7 @@ module.exports = {
   async createView (req, res, next) {
     let photo = await Photo.findById(req.data.photo_id)
     photo.viewcount += 1
-    photo.save()
+    await photo.save()
 
     photo = await photo.reload()
     res.states.data = photo
