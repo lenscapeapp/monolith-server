@@ -175,7 +175,7 @@ module.exports = {
     let likes = await photo.addLikedUser(req.user)
     photo = await photo.increment('number_of_likes', { by: likes[0] ? likes[0].length : 0 })
 
-    photo = photo.reload()
+    photo = await photo.reload()
     res.states.data = photo
     next()
   },
@@ -188,7 +188,7 @@ module.exports = {
     let unlikes = await photo.removeLikedUser(req.user)
     photo = await photo.decrement('number_of_likes', { by: unlikes })
 
-    photo = photo.reload()
+    photo = await photo.reload()
     res.states.data = photo
     next()
   },
