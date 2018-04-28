@@ -173,10 +173,9 @@ module.exports = {
     let photo = await Photo.findById(photoId)
 
     let likes = await photo.addLikedUser(req.user)
-    photo.number_of_likes += likes[0] ? likes[0].length : 0
-    await photo.save()
+    photo = await photo.increment('number_of_likes', { by: likes[0] ? likes[0].length : 0 })
 
-    photo = await photo.reload()
+    photo = photo.reload()
     res.states.data = photo
     next()
   },
@@ -187,10 +186,9 @@ module.exports = {
     let photo = await Photo.findById(photoId)
 
     let unlikes = await photo.removeLikedUser(req.user)
-    photo.number_of_likes -= unlikes
-    await photo.save()
+    photo = await photo.decrement('number_of_likes', { by: unlikes })
 
-    photo = await photo.reload()
+    photo = photo.reload()
     res.states.data = photo
     next()
   },
