@@ -54,7 +54,7 @@ module.exports = {
   },
 
   async listLocation (req, res, next) {
-    let {count, rows: locations} = await LocationTag.findAndCount({
+    let {rows: locations} = await LocationTag.findAndCount({
       where: {
         name: {
           [Op.iLike]: `%${req.data.input}%`
@@ -85,19 +85,22 @@ module.exports = {
   async listLocationPhoto (req, res, next) {
     let { page, size, startId, location_id: locationId, is_owner: isOwner } = req.data
 
-    let {count, rows} = await Photo.findAndCount({
-      where: {
-        locationtag_id: locationId,
-        id: {
-          [Op.lte]: startId
-        },
-        owner_id: isOwner ? req.user.id : { [Op.ne]: null }
+    let whereClause = {
+      locationtag_id: locationId,
+      id: {
+        [Op.lte]: startId
       },
-      order: [['createdAt', 'DESC']],
-      limit: size,
-      offset: size * (page - 1)
-    })
-
+      owner_id: isOwner ? req.user.id : { [Op.ne]: null }
+    }
+    let [count, rows] = await Promise.all([
+      Photo.scope(null).count({ where: whereClause }),
+      Photo.findAll({
+        where: whereClause,
+        order: [['createdAt', 'DESC']],
+        limit: size,
+        offset: size * (page - 1)
+      })
+    ])
     res.states.data = rows
     res.states.count = count
     res.states.page = page

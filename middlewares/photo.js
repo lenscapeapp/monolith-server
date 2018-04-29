@@ -137,23 +137,30 @@ module.exports = {
     let monthQuery = sequelize.where(sequelize.fn('date_part', 'month', sequelize.col('Photo.createdAt')), month)
 
     try {
-      let {count, rows} = await Photo.scope('withOwner', 'withLikes').findAndCount({
-        where: sequelize.and(
-          { type: 'photo', id: { [Op.lte]: startId } },
-          month > 0 ? monthQuery : {}
-        ),
-        order: [['createdAt', 'DESC']],
-        include: [{
-          association: Photo.associations.LocationTag,
-          where: {
-            lat: { [Op.between]: [swBound.latitude(), neBound.latitude()] },
-            long: { [Op.between]: [swBound.longitude(), neBound.longitude()] }
-          }
-        }],
-        limit: size,
-        offset: size * (page - 1)
-      })
-
+      let whereClause = sequelize.and(
+        { type: 'photo', id: { [Op.lte]: startId } },
+        month > 0 ? monthQuery : {}
+      )
+      let include = [{
+        association: Photo.associations.LocationTag,
+        where: {
+          lat: { [Op.between]: [swBound.latitude(), neBound.latitude()] },
+          long: { [Op.between]: [swBound.longitude(), neBound.longitude()] }
+        }
+      }]
+      let [count, rows] = await Promise.all([
+        Photo.scope(null).count({
+          where: whereClause,
+          include
+        }),
+        Photo.scope('withOwner', 'withLikes').findAll({
+          where: whereClause,
+          order: [['createdAt', 'DESC']],
+          include,
+          limit: size,
+          offset: size * (page - 1)
+        })
+      ])
       res.states = {
         count,
         data: rows,
