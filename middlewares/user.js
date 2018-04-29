@@ -10,18 +10,23 @@ module.exports = {
 
   async getPhoto (req, res, next) {
     let { page, size, startId } = req.data
-    let {count, rows} = await Photo.findAndCount({
-      where: {
-        type: 'photo',
-        owner_id: req.user.id,
-        id: {
-          [Op.lte]: startId
-        }
-      },
-      order: [['createdAt', 'DESC']],
-      limit: size,
-      offset: size * (page - 1)
-    })
+
+    let whereClause = {
+      type: 'photo',
+      owner_id: req.user.id,
+      id: {
+        [Op.lte]: startId
+      }
+    }
+    let [count, rows] = await Promise.all([
+      Photo.scope(null).count({ where: whereClause }),
+      Photo.findAll({
+        where: whereClause,
+        order: [['createdAt', 'DESC']],
+        limit: size,
+        offset: size * (page - 1)
+      })
+    ])
 
     res.states.data = rows
     res.states.count = count
