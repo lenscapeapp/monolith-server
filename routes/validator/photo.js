@@ -170,6 +170,12 @@ module.exports = {
       .optional()
       .isInt({min: 0, max: 12})
       .withMessage('month must be an integer between 0 and 12'),
+    query('time_taken')
+      .optional()
+      .isInt({min: 0, max: PARTS_OF_DAY.length - 1}).withMessage(`time_taken must be an integer between 0 and ${PARTS_OF_DAY.length}`),
+    query('season')
+      .optional()
+      .isInt({min: 0, max: SEASONS.length - 1}).withMessage(`season must be an integer between 0 and ${PARTS_OF_DAY.length}`),
     (req, res, next) => {
       req.data = Object.assign(req.data || {}, {
         month: 0

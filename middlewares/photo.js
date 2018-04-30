@@ -131,14 +131,17 @@ module.exports = {
   },
 
   async listPhoto (req, res, next) {
-    let { page, size, startId, month, targetLocation } = req.data
+    let { page, size, startId, month, targetLocation, season, time_taken: timeTaken } = req.data
     let [swBound, neBound] = targetLocation.boundingCoordinates(DEFAULT_QUERY_RADIUS, 0, true)
 
     let monthQuery = sequelize.where(sequelize.fn('date_part', 'month', sequelize.col('Photo.createdAt')), month)
+    let filter = { type: 'photo', id: { [Op.lte]: startId } }
+    if (SEASONS[season]) filter.season = SEASONS[season]
+    if (PARTS_OF_DAY[timeTaken]) filter.part_of_day = PARTS_OF_DAY[timeTaken]
 
     try {
       let whereClause = sequelize.and(
-        { type: 'photo', id: { [Op.lte]: startId } },
+        filter,
         month > 0 ? monthQuery : {}
       )
       let include = [{
