@@ -240,5 +240,10 @@ module.exports = {
     photo = await photo.reload()
     res.states.data = photo
     next()
+  },
+
+  async daily (req, res, next) {
+    res.states.data = res.states.data[0]
+    next()
   }
 }
