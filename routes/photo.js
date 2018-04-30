@@ -82,4 +82,14 @@ router.route('/photo/:photo_id/view')
     Response.response
   )
 
+router.route('/photo/daily')
+  .get(
+    Request.paginationValidation,
+    Request.activateGuard,
+    Authentication.authenticate,
+    Photo.trend,
+    Photo.daily,
+    Response.response
+  )
+
 module.exports = router
