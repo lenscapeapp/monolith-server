@@ -9,14 +9,12 @@ const router = new Router()
 
 router.route('/')
   .get(
-    Authentication.authenticate,
     User.getUser,
     Response.response
   )
 
 router.route('/photos')
   .get(
-    Authentication.authenticate,
     Request.paginationValidation,
     Request.activateGuard,
     User.getPhoto,
@@ -25,7 +23,6 @@ router.route('/photos')
 
 router.route('/photos/liked')
   .get(
-    Authentication.authenticate,
     Request.paginationValidation,
     Request.activateGuard,
     User.getLikedPhoto,
@@ -34,7 +31,6 @@ router.route('/photos/liked')
 
 router.route('/locations')
   .get(
-    Authentication.authenticate,
     User.getUploadLocation,
     Response.response
   )
