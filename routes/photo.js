@@ -89,6 +89,13 @@ router.route('/photo/:photo_id/view')
     Response.response
   )
 
+router.route('/photo/:photo_id/report')
+  .post(
+    Authentication.authenticate,
+    Photo.report,
+    Response.response
+  )
+
 router.route('/photo/daily')
   .get(
     Request.paginationValidation,
