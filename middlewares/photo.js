@@ -112,6 +112,13 @@ module.exports = {
 
   async deletePhoto (req, res, next) {
     let photo = await Photo.findById(req.data.photo_id)
+
+    if (photo.owner_id !== req.user) {
+      res.statusCode = 400
+      res.message = 'You are not the owner of this photo'
+      return next(new Error())
+    }
+
     await Like.destroy({ where: { photo_id: req.data.photo_id } })
     await photo.destroy()
 
