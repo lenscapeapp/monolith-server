@@ -10,6 +10,7 @@ const authRouter = require('./auth')
 const userRouter = require('./user')
 const photoRouter = require('./photo')
 const locationRouter = require('./location')
+const notificationRouter = require('./notification')
 
 const router = new Router()
 
@@ -38,6 +39,7 @@ router.use('*', (req, res, next) => {
 
 router.use('/', authRouter)
 router.use('/', photoRouter)
+router.use('/', notificationRouter)
 router.use('/aroundme', aroundmeRouter)
 router.use('/location', locationRouter)
 router.use('/me', userRouter)
