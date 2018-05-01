@@ -35,6 +35,10 @@ router.route('/notify')
         group: 'Photo.id'
       })
 
+      if (!photo) {
+        return res.send({ message: 'No photo of the day' })
+      }
+
       let body = {
         to: '/topics/' + TOPIC,
         priority: 'high',
