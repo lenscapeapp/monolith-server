@@ -2,7 +2,6 @@ const GeoPoint = require('geopoint')
 const { Router } = require('express')
 
 const { PARTS_OF_DAY, SEASONS } = require('../config/constants')
-const Response = require('../middlewares/response')
 
 // Logic router
 const aroundmeRouter = require('./aroundme')
@@ -11,6 +10,11 @@ const userRouter = require('./user')
 const photoRouter = require('./photo')
 const locationRouter = require('./location')
 const notificationRouter = require('./notification')
+
+const Request = require('../middlewares/request')
+const UserValidator = require('./validator/user')
+const Authentication = require('../middlewares/authentication')
+const { User } = require('../models')
 
 const router = new Router()
 
@@ -42,7 +46,20 @@ router.use('/', photoRouter)
 router.use('/', notificationRouter)
 router.use('/aroundme', aroundmeRouter)
 router.use('/location', locationRouter)
-router.use('/me', userRouter)
+router.use('/me|/user/:user_id',
+  Authentication.authenticate,
+  UserValidator.getOtherUser,
+  Request.activateGuard,
+  async (req, res, next) => {
+    if (req.data.user_id) {
+      req.asUser = await User.findById(req.data.user_id)
+    } else {
+      req.asUser = req.user
+    }
+    next()
+  },
+  userRouter
+)
 
 router.route('/seasons')
   .get(

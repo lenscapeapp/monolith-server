@@ -4,7 +4,7 @@ const Op = sequelize.Op
 
 module.exports = {
   getUser (req, res, next) {
-    res.states.data = req.user
+    res.states.data = req.asUser
     next()
   },
 
@@ -13,7 +13,7 @@ module.exports = {
 
     let whereClause = {
       type: 'photo',
-      owner_id: req.user.id,
+      owner_id: req.asUser.id,
       id: {
         [Op.lte]: startId
       }
@@ -45,7 +45,7 @@ module.exports = {
       include: [{
         association: Photo.associations.LikedUsers,
         through: {
-          where: { user_id: req.user.id }
+          where: { user_id: req.asUser.id }
         },
         required: true,
         duplicating: false // This is here to prevent subquery generation https://github.com/sequelize/sequelize/issues/3007
@@ -68,7 +68,7 @@ module.exports = {
         association: LocationTag.associations.Photos,
         required: true,
         where: {
-          owner_id: req.user.id,
+          owner_id: req.asUser.id,
           type: 'photo'
         }
       }],
