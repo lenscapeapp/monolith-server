@@ -7,7 +7,7 @@ const { FCM_KEY, SERVER_URL } = require('../config/constants')
 
 const router = new Router()
 const fcm = new FCM(FCM_KEY)
-const TOPIC = 'tests'
+const TOPIC = 'photoOfTheDay'
 
 router.route('/notify')
   .get(
