@@ -39,7 +39,7 @@ router.route('/notify')
         to: '/topics/' + TOPIC,
         priority: 'high',
         data: {
-          image_id: photo.id
+          photo_id: photo.id
         },
         notification: {
           body: 'Take a look at our photo of the day',
