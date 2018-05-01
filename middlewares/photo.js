@@ -252,5 +252,10 @@ module.exports = {
 
     res.states.data = photo
     next()
+  },
+
+  async report (req, res, next) {
+    res.states.data = {}
+    next()
   }
 }
