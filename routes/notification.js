@@ -14,7 +14,6 @@ router.route('/notify')
     async (req, res, next) => {
       let now = new Date()
 
-      req.user = await User.findOne()
       let photo = await Photo.scope('withOwner', 'withLocation').findOne({
         attributes: {
           include: [[sequelize.fn('count', sequelize.col('*')), 'likes_count']],
@@ -36,12 +35,11 @@ router.route('/notify')
         group: 'Photo.id'
       })
 
-      let payload = getResponse(photo, req)
       let body = {
         to: '/topics/' + TOPIC,
         priority: 'high',
         data: {
-          image: JSON.stringify(payload)
+          image_id: photo.id
         },
         notification: {
           body: 'Take a look at our photo of the day',
@@ -50,14 +48,11 @@ router.route('/notify')
           sound: 'default'
         }
       }
-      // console.log(`${SERVER_URL}/photo/${photo.id}`)
 
       fcm.send(body, (err, response) => {
         if (err) return next(err)
         res.send(response)
       })
-      console.log(photo)
-      res.send(photo)
     }
   )
 

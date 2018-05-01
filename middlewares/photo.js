@@ -245,5 +245,12 @@ module.exports = {
   async daily (req, res, next) {
     res.states.data = res.states.data[0]
     next()
+  },
+
+  async getPhoto (req, res, next) {
+    let photo = await Photo.findById(req.data.photo_id)
+
+    res.states.data = photo
+    next()
   }
 }
