@@ -33,6 +33,13 @@ router.route('/photo')
   )
 
 router.route('/photo/:photo_id')
+  .get(
+    Guard.getPhoto,
+    Request.activateGuard,
+    Authentication.authenticate,
+    Photo.getPhoto,
+    Response.response
+  )
   .delete(
     Guard.deletePhoto,
     Request.activateGuard,

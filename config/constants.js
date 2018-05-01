@@ -22,6 +22,7 @@ module.exports = {
   DEFAULT_PAGE_SIZE: 25,
   DEFAULT_QUERY_RADIUS: 5,
   DEFAULT_SECRET,
+  FCM_KEY: process.env.FCM_KEY,
   GCLOUD_PROJECT_ID: 'lenscapeapp',
   IMAGINARY_BASEURL: IS_PRODUCTION ? 'http://imaginary:9000' : (process.env.IMAGINARY_BASEURL || 'http://localhost:9000'),
   IS_NEAR_DISTANCE: 2,
@@ -35,5 +36,6 @@ module.exports = {
   },
   PLACEHOLDER_PROFILE_URL: `${BUCKET_BASEURL}/placeholder/profile.jpg`,
   SEASONS: ['Winter', 'Spring', 'Summer', 'Autumn'],
-  SECRET: process.env.APP_SECRET || DEFAULT_SECRET
+  SECRET: process.env.APP_SECRET || DEFAULT_SECRET,
+  SERVER_URL: process.env.APP_URL || 'https://api.lenscape.me'
 }
